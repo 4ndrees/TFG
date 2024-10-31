@@ -1,6 +1,5 @@
 # Core packages
-tensorflow>=2.18.0
-keras>=3.6.0
+tensorflow<2.11
 
 # Additional libraries
 scikit-learn>=1.5.2

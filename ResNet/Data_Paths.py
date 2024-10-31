@@ -6,12 +6,11 @@
 # ------------------------------------------------------#
 
 # Dataset
-TRAIN_DATASET = r"C:\\Users\\vssta\\OneDrive\\Escritorio\\pruebas_csv_imagenes\\images\\train"
-TEST_DATASET = r"C:\\Users\\vssta\\OneDrive\\Escritorio\\pruebas_csv_imagenes\\images\\test"
-VAL_DATASET = r"C:\\Users\\vssta\\OneDrive\\Escritorio\\pruebas_csv_imagenes\\images\\valid"
-
+TRAIN_DATASET = r"C:\\Users\\vssta\\OneDrive\\Escritorio\\TFG\\ResNet\\images\\train"
+TEST_DATASET = r"C:\\Users\\vssta\\OneDrive\\Escritorio\\TFG\\ResNet\\images\\test"
+VAL_DATASET = r"C:\\Users\\vssta\\OneDrive\\Escritorio\\TFG\\ResNet\\images\\valid"
 # CSV
-CSV_DATSET = r"C:\\Users\\vssta\\OneDrive\\Escritorio\\pruebas_csv_imagenes\\Dataset.csv"
+CSV_DATSET = r"C:\\Users\\vssta\\OneDrive\\Escritorio\\TFG\\ResNet\\Dataset.csv"
 
 # MODEL
-MODEL_DATASET = "C:\\Users\\vssta\\OneDrive\\Escritorio\\pruebas_csv_imagenes\\model"
+MODEL_DATASET = "C:\\Users\\vssta\\OneDrive\\Escritorio\\TFG\\ResNet\\model"

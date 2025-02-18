@@ -1,0 +1,5 @@
+npm install express @tensorflow/tfjs @tensorflow/tfjs-node body-parser
+
+
+para correr la app node app.js
+

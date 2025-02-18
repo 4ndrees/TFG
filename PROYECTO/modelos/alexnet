@@ -1,0 +1,89 @@
+const tf = require('@tensorflow/tfjs-node');
+
+// Crear el modelo AlexNet
+function createAlexNetModel(inputShape = [227, 227, 3]) {
+    const model = tf.sequential();
+
+    // Capa convolucional 1
+    model.add(tf.layers.conv2d({
+        inputShape: inputShape,
+        filters: 96,
+        kernelSize: 11,
+        strides: 4,
+        activation: 'relu',
+        kernelInitializer: 'glorotUniform',
+    }));
+    model.add(tf.layers.maxPooling2d({ poolSize: [3, 3], strides: 2 }));
+
+    // Capa convolucional 2
+    model.add(tf.layers.conv2d({
+        filters: 256,
+        kernelSize: 5,
+        padding: 'same',
+        activation: 'relu',
+        kernelInitializer: 'glorotUniform',
+    }));
+    model.add(tf.layers.maxPooling2d({ poolSize: [3, 3], strides: 2 }));
+
+    // Capa convolucional 3
+    model.add(tf.layers.conv2d({
+        filters: 384,
+        kernelSize: 3,
+        padding: 'same',
+        activation: 'relu',
+        kernelInitializer: 'glorotUniform',
+    }));
+
+    // Capa convolucional 4
+    model.add(tf.layers.conv2d({
+        filters: 384,
+        kernelSize: 3,
+        padding: 'same',
+        activation: 'relu',
+        kernelInitializer: 'glorotUniform',
+    }));
+
+    // Capa convolucional 5
+    model.add(tf.layers.conv2d({
+        filters: 256,
+        kernelSize: 3,
+        padding: 'same',
+        activation: 'relu',
+        kernelInitializer: 'glorotUniform',
+    }));
+    model.add(tf.layers.maxPooling2d({ poolSize: [3, 3], strides: 2 }));
+
+    // Aplanar las salidas para las capas densas
+    model.add(tf.layers.flatten());
+
+    // Capa densa 1
+    model.add(tf.layers.dense({
+        units: 4096,
+        activation: 'relu',
+        kernelInitializer: 'glorotUniform',
+    }));
+
+    // Capa densa 2
+    model.add(tf.layers.dense({
+        units: 4096,
+        activation: 'relu',
+        kernelInitializer: 'glorotUniform',
+    }));
+
+    // Capa de salida
+    model.add(tf.layers.dense({
+        units: 1000,  // Número de clases en ImageNet
+        activation: 'softmax',
+    }));
+
+    // Compilar el modelo
+    model.compile({
+        optimizer: tf.train.adam(),
+        loss: 'categoricalCrossentropy',
+        metrics: ['accuracy'],
+    });
+
+    return model;
+}
+
+module.exports = createAlexNetModel;

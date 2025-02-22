@@ -1,4 +1,4 @@
-const tf = require('@tensorflow/tfjs-node');
+const tf = require('@tensorflow/tfjs');
 
 // Crear el modelo AlexNet
 function createAlexNetModel(inputShape = [227, 227, 3]) {

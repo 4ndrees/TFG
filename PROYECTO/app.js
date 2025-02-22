@@ -1,4 +1,4 @@
-async function trainModel() {
+async function entrenarModelo() {
   const trainImageInput = document.getElementById('trainImage');
   const images = [];
   const labels = [];
@@ -26,7 +26,7 @@ async function trainModel() {
   }
 }
 
-async function classifyImage() {
+async function clasificarImagen() {
   const classifyImageInput = document.getElementById('classifyImage');
   const file = classifyImageInput.files[0];
   const reader = new FileReader();
@@ -45,4 +45,16 @@ async function classifyImage() {
   };
 
   reader.readAsDataURL(file);
+}
+
+async function seleccionarModelo(){
+
+}
+
+async function mostrarMetricas(){
+    
+}
+
+async function cambiarModelo(){
+    
 }

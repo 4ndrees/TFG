@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const tf = require('@tensorflow/tfjs-node');
+const tf = require('@tensorflow/tfjs');
+const { spawn } = require('child_process');
 const path = require('path');
 const createAlexNetModel = require('./modelos/alexnet');
 
@@ -23,7 +24,7 @@ app.get('/', (req, res) => {
 
 
 // Ruta para entrenar el modelo
-app.post('/train', async (req, res) => {
+app.post('/train-python', async (req, res) => {
     console.log("Iniciando entrenamiento con imágenes predefinidas...");
 
     try {
@@ -80,6 +81,23 @@ app.post('/train', async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Error al entrenar el modelo' });
     }
+
+    // const pythonScript = path.join(/modelos, 'VGGNet.py'); // Ruta del archivo Python
+
+    // const process = spawn('python', [pythonScript, 'prueba', '1', '1', '1', 'adam']);
+
+    // process.stdout.on('data', (data) => {
+    //     console.log(`Salida de Python: ${data}`);
+    // });
+
+    // process.stderr.on('data', (data) => {
+    //     console.error(`Error en Python: ${data}`);
+    // });
+
+    // process.on('close', (code) => {
+    //     console.log(`Proceso Python finalizado con código ${code}`);
+    //     res.json({ message: 'Entrenamiento finalizado en Python' });
+    // });
 });
   
   // Ruta para clasificar usando el modelo entrenado

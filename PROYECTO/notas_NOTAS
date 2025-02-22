@@ -1,5 +1,14 @@
-npm install express @tensorflow/tfjs @tensorflow/tfjs-node body-parser
+Ejecuta estos comandos para verificar la versión de Node.js y npm:
 
+node -v
+npm -v
 
-para correr la app node app.js
+nvm use 20.18.3
+
+instala dependencias del proyecto, esto instalara todas las dependencias listadas en el package.json
+
+npm install
+
+para correr la app node server.js
+
 

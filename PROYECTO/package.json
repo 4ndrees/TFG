@@ -8,10 +8,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "^3.0.0",
+    "@tensorflow/tfjs": "^3.21.0",
     "@tensorflow/tfjs-node": "^4.22.0",
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1"
+    "body-parser": "^1.20.3",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security"
   },
   "keywords": [
     "IA",

@@ -48,13 +48,15 @@ async function clasificarImagen() {
 }
 
 async function seleccionarModelo(){
+    //miro en el seleccionador cual es el que esta seleccionado
+    //creo wue esta funcion es innecesaria
 
 }
-
+//parametro: modelo seleccionado
 async function mostrarMetricas(){
-    
+    //meto en las vistas lo que me devuelva 
 }
 
 async function cambiarModelo(){
-    
+    //darle al okei mostrnado metricas y llamar a mostrar metricas con el nuevo modelo 
 }

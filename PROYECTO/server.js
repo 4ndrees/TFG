@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const tf = require('@tensorflow/tfjs');
 const { spawn } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 const createAlexNetModel = require('./modelos/alexnet');
 
@@ -15,7 +16,11 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 //para cargar los modelos
-let model = createAlexNetModel();
+let model;
+(async () => {
+    model = createAlexNetModel();
+})();
+
 
 //cargar la página principal
 app.get('/', (req, res) => {
@@ -135,6 +140,6 @@ app.post('/train-python', async (req, res) => {
 
   
   // Iniciar el servidor
-  app.listen(port, () => {
-    console.log(`Servidor escuchando en http://localhost:${port}`);
-  });
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Servidor accesible en http://0.0.0.0:${port}`);
+});

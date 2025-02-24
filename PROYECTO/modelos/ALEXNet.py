@@ -229,4 +229,4 @@ if __name__ == "__main__":
     ##optimizer_name = sys.argv[5]
 
     ##entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
-    entrenamiento("ALEXNet", 32, 20, 0.01, "adam")  # "adam" como string
+    entrenamiento("ALEXNet", 32, 40, 0.001, "adam")  # "adam" como string

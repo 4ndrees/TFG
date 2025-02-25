@@ -48,12 +48,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Añadir imágener a los divs "imagen-flotante"
     const images = [
-        '/InterfazTFG/images/00A0WLZE5X.jpg', 
-        '/InterfazTFG//images/00AUP94LQS.jpg',
-        '/InterfazTFG//images/00B4R41FLE.jpg',
-        '/InterfazTFG//images/00C64W8TYZ.jpg',
-        '/InterfazTFG//images/00CB415UQ7.jpg',
-        '/InterfazTFG//images/00ELJIYESN.jpg'
+        '/PROYECTO/InterfazTFG/images/00A0WLZE5X.jpg', 
+        '/PROYECTO/InterfazTFG//images/00AUP94LQS.jpg',
+        '/PROYECTO/InterfazTFG//images/00B4R41FLE.jpg',
+        '/PROYECTO/InterfazTFG//images/00C64W8TYZ.jpg',
+        '/PROYECTO/InterfazTFG//images/00CB415UQ7.jpg',
+        '/PROYECTO/InterfazTFG//images/00ELJIYESN.jpg'
     ];
 
 	windows.forEach((w, i) => {

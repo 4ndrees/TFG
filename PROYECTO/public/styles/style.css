@@ -18,8 +18,8 @@ p{
 }
 
 .window {
-	width: 200px;
-	height: 200px;
+	width: 10vw;
+	height: 10vw;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -31,9 +31,14 @@ ul{
     margin: 0;
     padding: 0;
     overflow: hidden;
+    display: flex; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+
 }
 
 ul li{
+    flex: 1 1 auto;
     float: left;
 }
 
@@ -144,7 +149,7 @@ h3{
 }
 
 .pantalla-principal{
-    position: fixed;
+    position: relative;
     background: rgba(242, 232, 223, 0.95);
     height: 700px;
     width: 1200px;
@@ -296,6 +301,12 @@ textarea{
     padding: 20px 0px;
 }
 
+.metricas-elem img {
+    max-width: 100%;  /* Se ajusta al 100% del ancho del contenedor */
+    height: auto;     /* Mantiene la proporción */
+}
+
+
 table {
     width: 80%;
     border-collapse: collapse;
@@ -332,3 +343,4 @@ tr:hover {
 .return-elem{
     margin: 50px 0px;
 }
+

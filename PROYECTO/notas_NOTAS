@@ -16,3 +16,6 @@ ahora mismo se llega con la ruta http://localhost:3000 desde
 el ordenador en el que se lance 
 
 
+se necesita instalar pip install tqdm
+tb pip install torch torchvision torchaudio
+

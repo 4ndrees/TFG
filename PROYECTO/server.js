@@ -27,6 +27,32 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.post('/entrenar', (req, res) => {
+    //parametros
+    const { nombreModelo, miniBatchSize, maxEpochs, learnRate, optimizerName } = req.body;
+
+    console.log(`Entrenando modelo: ${nombreModelo}`);
+    console.log(`Mini-Batch Size: ${miniBatchSize}, Max Epochs: ${maxEpochs}, Learning Rate: ${learnRate}, Optimizer: ${optimizerName}`);
+
+    // Ejecutar el script de Python con los parámetros
+    const python = spawn('python', [`./modelos/${nombreModelo}.py`, miniBatchSize, maxEpochs, learnRate, optimizerName]);
+
+    python.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+    });
+
+    python.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+    });
+
+    python.on('close', (code) => {
+        if (code === 0) {
+            res.json({ message: 'Entrenamiento completado con éxito' });
+        } else {
+            res.status(500).json({ message: 'Hubo un error al ejecutar el script de entrenamiento' });
+        }
+    });
+});
 
 // Ruta para entrenar el modelo
 app.post('/train-python', async (req, res) => {

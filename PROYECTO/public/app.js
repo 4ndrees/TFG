@@ -1,5 +1,9 @@
+const { op } = require("@tensorflow/tfjs");
+
+const modeloSeleccionadoNombre = "AlexNet_19-11-24";
+
 async function entrenarModelo() {
-  const trainImageInput = document.getElementById('trainImage');
+  /*const trainImageInput = document.getElementById('trainImage');
   const images = [];
   const labels = [];
 
@@ -23,7 +27,44 @@ async function entrenarModelo() {
           }
       };
       reader.readAsDataURL(file);
-  }
+  }*/
+    const miniBatchSize = document.getElementById('minibatch').value;
+    const maxEpochs = document.getElementById('epochs').value;
+    const learnRate = document.getElementById('learningR').value;
+    const optimizer = data.find(modelo => modelo.id == document.getElementById('modelos-guardados').value)?.nombre;
+
+    const modeloSeleccionadoElement = document.querySelector('.model-btn-active p');
+    const modeloSeleccionado = modeloSeleccionadoElement ? modeloSeleccionadoElement.textContent : null;
+
+    console.log(optimizer);
+
+      if (!miniBatchSize || !maxEpochs || !learnRate || !modeloSeleccionado) {
+        alert("Por favor, ingresa todos los parámetros.");
+        return;
+    }
+
+    const response = await fetch('/entrenar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            nombreModelo: modeloSeleccionado,
+            miniBatchSize: parseInt(miniBatchSize),
+            maxEpochs: parseInt(maxEpochs),
+            learnRate: parseFloat(learnRate),
+            optimizerName: optimizer
+        })
+    });
+
+    const result = await response.json();
+
+    if (result.message) {
+        alert(result.message);
+        window.location.href = './results.html';  // Redirigir a resultados
+    } else {
+        alert("Hubo un error al entrenar el modelo.");
+    }
 }
 
 async function clasificarImagen() {
@@ -32,7 +73,7 @@ async function clasificarImagen() {
   const reader = new FileReader();
 
   reader.onload = async function(event) {
-      const base64Image = event.target.result.split(',')[1];  // Convertir a base64
+      const base64Image = event.target.result.split(',')[1];  
 
       // Enviar imagen al backend para clasificación
       const response = await fetch('/classify', {
@@ -50,6 +91,12 @@ async function clasificarImagen() {
 async function seleccionarModelo(){
     //miro en el seleccionador cual es el que esta seleccionado
     //creo wue esta funcion es innecesaria
+    const select = document.getElementById("modelos-guardados");
+    const modeloSeleccionado = select.value;
+
+    modeloSeleccionadoNombre = data.find(modelo => modelo.id == modeloSeleccionado);
+
+    console.log("Modelo seleccionado:", modeloSeleccionadoNombre.nombre);
 }
 
 //parametro: modelo seleccionado

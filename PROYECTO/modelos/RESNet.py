@@ -191,8 +191,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         "optimizer": optimizer_name,
         "history": history_dict
     }
-    
-   # Evaluar el modelo en el conjunto de test
+
+    # Evaluar el modelo en el conjunto de test
     test_loss, test_acc = model.evaluate(test_generator, steps=test_generator.samples // mini_batch_size)
     print(f"Test Loss: {test_loss:.4f}")
     print(f"Test Accuracy: {test_acc:.4f}")

@@ -12,7 +12,8 @@
     "@tensorflow/tfjs-node": "^4.22.0",
     "body-parser": "^1.20.3",
     "express": "^4.21.2",
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "TFG": "file:"
   },
   "keywords": [
     "IA",

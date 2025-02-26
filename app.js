@@ -27,7 +27,7 @@ async function entrenarModelo() {
 }
 
 async function clasificarImagen() {
-  const classifyImageInput = document.getElementById('classifyImage');
+  const classifyImageInput = document.getElementById('fileInput');
   const file = classifyImageInput.files[0];
   const reader = new FileReader();
 
@@ -50,8 +50,8 @@ async function clasificarImagen() {
 async function seleccionarModelo(){
     //miro en el seleccionador cual es el que esta seleccionado
     //creo wue esta funcion es innecesaria
-
 }
+
 //parametro: modelo seleccionado
 async function mostrarMetricas(){
     //meto en las vistas lo que me devuelva 

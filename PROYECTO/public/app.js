@@ -1,5 +1,3 @@
-const { op } = require("@tensorflow/tfjs");
-
 async function entrenarModelo() {
     const miniBatchSize = document.getElementById('minibatch').value;
     const maxEpochs = document.getElementById('epochs').value;

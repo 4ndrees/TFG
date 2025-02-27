@@ -3,6 +3,19 @@ import json
 import shutil
 import zipfile
 import datetime
+try:
+    import torch
+    import tqdm
+    import kaggle
+except ImportError:
+    import sys
+    import subprocess
+    subprocess.run([sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio", "tqdm", "kaggle"])
+
+    import torch
+    import tqdm
+    import kaggle
+
 from tqdm import tqdm  
 import torch
 import torch.nn as nn
@@ -12,7 +25,7 @@ import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 from torchvision import models
 from torchvision.models import AlexNet_Weights
-from kaggle.api.kaggle_api_extended import KaggleApi
+from kaggle.api.kaggle_api_extended import KaggleApi #esto falla faltan importaciones
 
 
 def verificar_dataset(dataset_dir):
@@ -131,6 +144,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     model.to(device)  # Mueve el modelo a la GPU si está disponible, de lo contrario, a la CPU
     
     criterion = nn.BCEWithLogitsLoss()
+    #esto da fallo por lr
     optimizer = optim.Adam(model.parameters(), lr=learn_rate) if optimizer_name == 'adam' else optim.SGD(model.parameters(), lr=lr, momentum=0.9)
     
     print("Entrenando modelo...")
@@ -205,7 +219,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     }
     
     fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
-    historial_archivo = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}_historial.json")
+    historial_archivo = f"public/historial/{nombre_modelo}_historial.json"
     
     with open(historial_archivo, 'w') as f:
         json.dump(historial_completo, f)
@@ -216,6 +230,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     modelo_dir = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}.pth")
     torch.save(model.state_dict(), modelo_dir)
     print(f"Modelo guardado en {modelo_dir}")
+
+    
      
         
         

@@ -29,8 +29,10 @@
         <h2 class="subtitulo">Información del modelo</h2>
         <section id="informacion-modelo">
             <div>
-                <select id="modelos-guardados" onclick="cambiarModelo()"></select>
+                <select id="modelos-guardados" onchange="cambiarModelo()"></select>
             </div>
+        </section>
+        <section id="info-modelo">
             <div class="info">
                 <div class="columna-info">
                     <p>Modelo: AlexNet</p>
@@ -87,5 +89,11 @@
             </div>
         </section>
     </article>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Página cargada");
+            mostrarMetricas();
+        });
+    </script>
 </body>
 </html>

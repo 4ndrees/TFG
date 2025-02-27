@@ -4,7 +4,7 @@ const tf = require('@tensorflow/tfjs');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const createAlexNetModel = require('./modelos/alexnet');
+
 
 // Crear una instancia de la aplicación Express
 const app = express();
@@ -14,12 +14,7 @@ const port = 3000;
 app.use(bodyParser.json());
 
 app.use(express.static('public'));
-
-//para cargar los modelos
-let model;
-(async () => {
-    model = createAlexNetModel();
-})();
+app.use('/modelos', express.static(path.join(__dirname, 'modelos')));
 
 
 //cargar la página principal
@@ -37,103 +32,65 @@ app.post('/entrenar', (req, res) => {
     // Ejecutar el script de Python con los parámetros
     const python = spawn('python', [`./modelos/${nombreModelo}.py`, miniBatchSize, maxEpochs, learnRate, optimizerName]);
 
+    // console.log('Iniciando entrenamiento...');
+
+    // python.stdout.on('data', (data) => {
+    //     console.log(`stdout: ${data}`);
+    // });
+
+    // python.stderr.on('data', (data) => {
+    //     console.error(`stderr: ${data}`);
+    // });
+
+    // python.on('close', (code) => {
+    //     if (code === 0) {
+    //         res.status(200).json({ message: 'Entrenamiento completado con éxito' });
+    //     } else {
+    //         res.status(500).json({ message: 'Hubo un error al ejecutar el script de entrenamiento' });
+    //     }
+    // });
+    let stdoutData = ''; // Acumula los datos de stdout
+    let stderrData = ''; // Acumula los datos de stderr
+
+    // Capturar la salida estándar del script Python
     python.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
+        stdoutData += data.toString();
+        console.log(`stdout: ${data.toString()}`);
     });
 
+    // Capturar el error estándar
     python.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
+        stderrData += data.toString();
+        console.error(`stderr: ${data.toString()}`);
     });
 
+    // Evento cuando el proceso Python finaliza
     python.on('close', (code) => {
         if (code === 0) {
-            res.json({ message: 'Entrenamiento completado con éxito' });
+            console.log('Entrenamiento completado con éxito');
+            res.status(200).json({ message: 'Entrenamiento completado con éxito', output: stdoutData });
         } else {
-            res.status(500).json({ message: 'Hubo un error al ejecutar el script de entrenamiento' });
+            console.error(`Error en el script Python con código de salida ${code}`);
+            console.error(`Error completo: ${stderrData}`);
+            res.status(500).json({
+                message: 'Hubo un error al ejecutar el script de entrenamiento',
+                error: stderrData
+            });
         }
     });
-});
 
-// Ruta para entrenar el modelo
-app.post('/train-python', async (req, res) => {
-    console.log("Iniciando entrenamiento con imágenes predefinidas...");
-
-    try {
-        // Directorio donde tienes las imágenes
-        const imageDir = path.join(__dirname, 'data');
-
-        // Lee las imágenes desde el directorio
-        const imageFiles = fs.readdirSync(imageDir);
-
-        // Arreglos para almacenar las imágenes y las etiquetas
-        let images = [];
-        let labels = [];
-
-        // Cargar las imágenes y convertirlas a tensores
-        for (let file of imageFiles) {
-            const filePath = path.join(imageDir, file);
-
-            // Leer la imagen desde el archivo y convertirla a un tensor
-            const imageTensor = tf.node.decodeImage(fs.readFileSync(filePath));
-
-            // Redimensionar la imagen a la forma que espera AlexNet (227x227)
-            const resizedImage = tf.image.resizeBilinear(imageTensor, [227, 227]);
-
-            // Normalizar la imagen (puedes hacerlo de acuerdo a tus necesidades)
-            const normalizedImage = resizedImage.div(tf.scalar(255));
-
-            // Agregar la imagen al arreglo
-            images.push(normalizedImage);
-
-            // Crear etiquetas (puedes personalizarlas dependiendo de cómo organices las imágenes)
-            // Aquí asumiré que las imágenes están en diferentes subcarpetas que representan las clases
-            const label = file.includes('real') ? [1, 0] : [0, 1];  // Etiqueta para "Real" o "generada"
-            labels.push(tf.tensor(label));
-        }
-
-        // Convertir las imágenes y las etiquetas en tensores
-        const imageTensorStack = tf.stack(images);
-        const labelTensorStack = tf.stack(labels);
-
-        // Crear el modelo AlexNet
-        const model = createAlexNetModel();
-
-        // Entrenar el modelo
-        await model.fit(imageTensorStack, labelTensorStack, {
-            epochs: 5,
-            batchSize: 32,
+    python.on('error', (err) => {
+        // En caso de que haya un error al iniciar el proceso Python
+        console.error('Error al ejecutar el proceso Python:', err);
+        res.status(500).json({
+            message: 'Error al iniciar el proceso Python',
+            error: err.message
         });
-
-        // Guardar el modelo entrenado
-        await model.save('file://modelos/alexnet_trained');
-
-        res.json({ message: 'Entrenamiento completado correctamente' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al entrenar el modelo' });
-    }
-
-    // const pythonScript = path.join(/modelos, 'VGGNet.py'); // Ruta del archivo Python
-
-    // const process = spawn('python', [pythonScript, 'prueba', '1', '1', '1', 'adam']);
-
-    // process.stdout.on('data', (data) => {
-    //     console.log(`Salida de Python: ${data}`);
-    // });
-
-    // process.stderr.on('data', (data) => {
-    //     console.error(`Error en Python: ${data}`);
-    // });
-
-    // process.on('close', (code) => {
-    //     console.log(`Proceso Python finalizado con código ${code}`);
-    //     res.json({ message: 'Entrenamiento finalizado en Python' });
-    // });
+    });
 });
-  
   // Ruta para clasificar usando el modelo entrenado
-  app.post('/classify', async (req, res) => {
-    const { image } = req.body;  // Imagen en base64
+  app.post('/clasificar', async (req, res) => {
+    const { image, nombreModelo } = req.body;  // Imagen en base64
   
     if (!image) {
       return res.status(400).json({ error: 'No se proporcionó imagen' });
@@ -148,8 +105,8 @@ app.post('/train-python', async (req, res) => {
         const resizedImage = tf.image.resizeBilinear(imageTensor, [227, 227]);
         const normalizedImage = resizedImage.div(tf.scalar(255));
 
-        // Cargar el modelo previamente entrenado
-        const model = await tf.loadLayersModel('file://models/alexnet_trained/model.json');
+        // Cargar el modelo previamente entrenado (no tenemos)
+        const model = await tf.loadLayersModel('');
 
         // Realizar la predicción
         const prediction = model.predict(normalizedImage.expandDims(0));

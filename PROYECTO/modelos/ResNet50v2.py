@@ -199,7 +199,11 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     # Guardar el historial y parámetros en un archivo JSON
     history_dict = history.history
+    fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
+    NombreModeloEntrenado = f"{nombre_modelo}_{fecha_hoy}"
     historial_completo = {
+        "date": fecha_hoy,
+        "name": NombreModeloEntrenado,
         "mini_batch_size": mini_batch_size,
         "max_epochs": max_epochs,
         "learn_rate": learn_rate,
@@ -210,8 +214,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     }
     
      # Guardar pesos del modelo   
-    fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
-    NombreModeloEntrenado = f"{nombre_modelo}_{fecha_hoy}"
+   
     modelo_dir = os.path.join(directorio_actual, "modelos", NombreModeloEntrenado + ".h5")
     model.save(modelo_dir)
     print (f"Modelo guardado como {NombreModeloEntrenado} en {modelo_dir}")
@@ -221,10 +224,6 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     with open(history_path, 'w') as f:
         json.dump(historial_completo, f, indent=4)
     print(f"Historial de entrenamiento, parámetros y resultados de prueba guardados en: {history_path}")
-    
-   
-
-
 
    
 

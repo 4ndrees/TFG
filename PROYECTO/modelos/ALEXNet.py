@@ -205,7 +205,12 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     test_accuracy = correct / total
     print(f"Precisión en el conjunto de prueba: {test_accuracy:.4f}, Pérdida en prueba: {test_loss:.4f}")
     
+    fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
+
+    
     historial_completo = {
+        "date": fecha_hoy,
+        "name": f"{nombre_modelo}_{fecha_hoy}",
         "mini_batch_size": mini_batch_size,
         "max_epochs": max_epochs,
         "learn_rate": learn_rate,
@@ -218,7 +223,6 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         }
     }
     
-    fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
     historial_archivo = f"public/historial/{nombre_modelo}_historial.json"
     
     with open(historial_archivo, 'w') as f:
@@ -226,14 +230,10 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     print(f"Historial guardado en {historial_archivo}")
 
-    fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
     modelo_dir = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}.pth")
     torch.save(model.state_dict(), modelo_dir)
     print(f"Modelo guardado en {modelo_dir}")
 
-    
-     
-        
         
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ app.post('/entrenar', (req, res) => {
     console.log(`Mini-Batch Size: ${miniBatchSize}, Max Epochs: ${maxEpochs}, Learning Rate: ${learnRate}, Optimizer: ${optimizerName}`);
 
     // Ejecutar el script de Python con los parámetros
-    const python = spawn('python', [`./modelos/${nombreModelo}.py`, miniBatchSize, maxEpochs, learnRate, optimizerName]);
+    const python = spawn('python', [`./modelos/${nombreModelo}.py`, nombreModelo, miniBatchSize, maxEpochs, learnRate, optimizerName]);
 
     // console.log('Iniciando entrenamiento...');
 

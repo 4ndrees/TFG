@@ -2,7 +2,7 @@ async function entrenarModelo() {
     const miniBatchSize = document.getElementById('minibatch').value;
     const maxEpochs = document.getElementById('epochs').value;
     const learnRate = document.getElementById('learningR').value;
-    const optimizer = data.find(modelo => modelo.id == document.getElementById('modelos-guardados').value)?.nombre;
+    const optimizer = document.getElementById('optimizadores').value || 'adam';
 
     const modeloSeleccionadoElement = document.querySelector('.model-btn-active p');
     const modeloSeleccionado = modeloSeleccionadoElement ? modeloSeleccionadoElement.textContent : null;

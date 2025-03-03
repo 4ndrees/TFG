@@ -119,7 +119,8 @@ async function mostrarImagen(){
 const data = [
 	{ id: 1, nombre: "AlexNet_19-11-24" },
 	{ id: 2, nombre: "ResNet_10-10-24" },
-	{ id: 3, nombre: "VGGNet_10-9-24" }
+	{ id: 3, nombre: "VGGNet_10-9-24" },
+	{ id: 3, nombre: "VGGNet_10-10-24" }
 ];
 
 // Esperar a que el DOM se cargue completamente

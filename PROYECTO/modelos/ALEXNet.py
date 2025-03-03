@@ -145,7 +145,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     criterion = nn.BCEWithLogitsLoss()
     #esto da fallo por lr
-    optimizer = optim.Adam(model.parameters(), lr=learn_rate) if optimizer_name == 'adam' else optim.SGD(model.parameters(), lr=lr, momentum=0.9)
+    optimizer = optim.Adam(model.parameters(), lr=learn_rate) if optimizer_name.lower() == 'adam' else optim.SGD(model.parameters(), lr=learn_rate, momentum=0.9)
     
     print("Entrenando modelo...")
     historial_perdida = []

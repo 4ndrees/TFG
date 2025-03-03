@@ -29,26 +29,9 @@ app.post('/entrenar', (req, res) => {
     console.log(`Entrenando modelo: ${nombreModelo}`);
     console.log(`Mini-Batch Size: ${miniBatchSize}, Max Epochs: ${maxEpochs}, Learning Rate: ${learnRate}, Optimizer: ${optimizerName}`);
 
-    // Ejecutar el script de Python con los parámetros
+    // Ejecutar el script de Python con los parámetross
     const python = spawn('python', [`./modelos/${nombreModelo}.py`, nombreModelo, miniBatchSize, maxEpochs, learnRate, optimizerName]);
 
-    // console.log('Iniciando entrenamiento...');
-
-    // python.stdout.on('data', (data) => {
-    //     console.log(`stdout: ${data}`);
-    // });
-
-    // python.stderr.on('data', (data) => {
-    //     console.error(`stderr: ${data}`);
-    // });
-
-    // python.on('close', (code) => {
-    //     if (code === 0) {
-    //         res.status(200).json({ message: 'Entrenamiento completado con éxito' });
-    //     } else {
-    //         res.status(500).json({ message: 'Hubo un error al ejecutar el script de entrenamiento' });
-    //     }
-    // });
     let stdoutData = ''; // Acumula los datos de stdout
     let stderrData = ''; // Acumula los datos de stderr
 
@@ -56,12 +39,6 @@ app.post('/entrenar', (req, res) => {
     python.stdout.on('data', (data) => {
         stdoutData += data.toString();
         console.log(`stdout: ${data.toString()}`);
-    });
-
-    // Capturar el error estándar
-    python.stderr.on('data', (data) => {
-        stderrData += data.toString();
-        console.error(`stderr: ${data.toString()}`);
     });
 
     // Evento cuando el proceso Python finaliza
@@ -79,6 +56,7 @@ app.post('/entrenar', (req, res) => {
         }
     });
 
+    //si falla el script
     python.on('error', (err) => {
         // En caso de que haya un error al iniciar el proceso Python
         console.error('Error al ejecutar el proceso Python:', err);
@@ -88,6 +66,7 @@ app.post('/entrenar', (req, res) => {
         });
     });
 });
+
   // Ruta para clasificar usando el modelo entrenado
   app.post('/clasificar', async (req, res) => {
     const { image, nombreModelo } = req.body;  // Imagen en base64

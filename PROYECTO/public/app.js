@@ -37,7 +37,7 @@ async function entrenarModelo() {
         //modelo seleccionado se tiene q cambiar por el parametro q me devuelva el py con fecha y hora
         const data = await response.json();
         alert(data.message); // Muestra el mensaje de éxito
-        window.location.href = `results.html?modelo=${modeloSeleccionado}`;
+        window.location.href = `results.html?modelo=${data.output}`;
     }
 }
 

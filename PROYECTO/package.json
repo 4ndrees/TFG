@@ -2,17 +2,15 @@
   "name": "TFG",
   "version": "1.0.0",
   "description": "Proyecto para entrenar modelos de IA con Express y TensorFlow.js",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@tensorflow/tfjs": "^3.21.0",
     "body-parser": "^1.20.3",
-    "express": "^4.21.2",
-    "fs": "^0.0.1-security",
-    "TFG": "file:"
+    "express": "^4.21.2"
   },
   "keywords": [
     "IA",

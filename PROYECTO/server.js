@@ -45,6 +45,7 @@ app.post('/entrenar', (req, res) => {
     python.on('close', (code) => {
         if (code === 0) {
             console.log('Entrenamiento completado con éxito');
+            //aqui envio el nombre del modelo
             res.status(200).json({ message: 'Entrenamiento completado con éxito', output: stdoutData });
         } else {
             console.error(`Error en el script Python con código de salida ${code}`);
@@ -76,23 +77,12 @@ app.post('/entrenar', (req, res) => {
     }
   
     try {
-        //eliminar prefijo 64
-        const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Data, 'base64');
-        //decodificar
-        const imageTensor = tf.browser.fromPixels(buffer);
-        //redimensionar
-        const resizedImage = tf.image.resizeBilinear(imageTensor, [227, 227]);
-        //normalizar
-        const normalizedImage = resizedImage.div(tf.scalar(255));
-        //expandir dimensiones
-        const input = normalizedImage.expandDims(0); // [1, 227, 227, 3]
-
+        
         // Cargar el modelo previamente entrenado (no tenemos)
         const model = await tf.loadLayersModel('');
 
         // Realizar la predicción
-        const prediction = model.predict(input);
+        const prediction = model.predict(image);
         
         // Aquí devolver la clase con el valor más alto
         const predictedClass = prediction.argMax(-1).dataSync()[0];

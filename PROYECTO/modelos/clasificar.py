@@ -7,7 +7,23 @@ from PIL import Image
 import sys
 
 
-def cargar_modelo_y_predecir(model_name, imagen_path):
+def procesar_imagen(imagen_base64):
+    """Convierte una imagen en base64 a un tensor para PyTorch."""
+    image_data = base64.b64decode(imagen_base64)  # Decodificar la imagen base64
+    image = Image.open(io.BytesIO(image_data))  # Convertir a objeto PIL
+
+    # Transformaciones necesarias para el modelo
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
+    image_tensor = transform(image).unsqueeze(0)  # Añadir batch dimension
+    return image_tensor
+
+def cargar_modelo_y_predecir(model_name, imagen_base64):
     # Ruta de la carpeta de modelos
     modelo_dir = os.path.join("modelos", model_name)
 
@@ -46,21 +62,8 @@ def cargar_modelo_y_predecir(model_name, imagen_path):
     model.load_state_dict(torch.load(dir_pesos))
     model.eval()  # Poner el modelo en modo de evaluación
 
-    # Abrir y transformar la imagen
-    try:
-        image = Image.open(imagen_path)
-    except Exception as e:
-        print(f"No se pudo abrir la imagen: {imagen_path}. Error: {e}")
-        return
+    image_tensor = procesar_imagen(imagen_base64)
 
-    # Preprocesar la imagen (ajustar tamaño y normalizar)
-    preprocess = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-    image_tensor = preprocess(image).unsqueeze(0)  # Añadir una dimensión para el batch
 
     # Realizar la predicción
     with torch.no_grad():  # Desactivar el cálculo de gradientes (no necesario en inferencia)
@@ -69,13 +72,14 @@ def cargar_modelo_y_predecir(model_name, imagen_path):
     
     # Mostrar el resultado
     if prediccion > 0.5:
-        print("REAL")
+       print(json.dumps("REAL"))
     else:
-        print("FALSA")
+       print(json.dumps("FALSE"))
+    sys.stdout.flush()
 
 
 if __name__ == "__main__":
-    nombre_modelo = sys.argv[1]
-    imagen_path = sys.argv[2]
+    model_name = sys.argv[1]  # Nombre del modelo
+    imagen_base64 = sys.argv[2]  # Imagen en formato base64
 
     cargar_modelo_y_predecir(nombre_modelo, imagen_path)

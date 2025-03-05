@@ -344,7 +344,9 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     generar_graficas(historial_completo, carpeta_modelo)
     
-    return f"{nombre_modelo}_{fecha_hoy}"
+    print(json.dumps(f"{nombre_modelo}_{fecha_hoy}"))
+    sys.stdout.flush()
+   
 
         
 
@@ -358,5 +360,4 @@ if __name__ == "__main__":
 
     #return entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
     entrenamiento("ALEXNet", 32, 5, 0.001, "adam")  # "adam" como string
-    print(json.dumps(nombreModelo))
-    sys.stdout.flush()
+  

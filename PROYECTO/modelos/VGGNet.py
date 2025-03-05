@@ -184,19 +184,17 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     # Guardar el historial y parámetros en un archivo JSON
     history_dict = history.history
-    historial_completo = {
-        "mini_batch_size": mini_batch_size,
-        "max_epochs": max_epochs,
-        "learn_rate": learn_rate,
-        "optimizer": optimizer_name,
-        "history": history_dict
-    }
     
    # Evaluar el modelo en el conjunto de test
     test_loss, test_acc = model.evaluate(test_generator, steps=test_generator.samples // mini_batch_size)
     print(f"Test Loss: {test_loss:.4f}")
     print(f"Test Accuracy: {test_acc:.4f}")
     
+    # Obtener predicciones del conjunto de prueba
+    test_predictions = model.predict(test_generator, steps=test_generator.samples // mini_batch_size)
+    test_labels = test_generator.classes  # Etiquetas reales del conjunto de prueba
+
+
     # Guardar el historial y parámetros en un archivo JSON
     history_dict = history.history
    

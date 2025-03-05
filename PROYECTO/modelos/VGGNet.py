@@ -231,11 +231,11 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
 if __name__ == "__main__":
     ## Leer argumentos de Node.js
-    ##nombre_modelo = sys.argv[1]
-    ##mini_batch_size = int(sys.argv[2])
-    ##max_epochs = int(sys.argv[3])
-    ##learn_rate = float(sys.argv[4])
-    ##optimizer_name = sys.argv[5]
+    nombre_modelo = sys.argv[1]
+    mini_batch_size = int(sys.argv[2])
+    max_epochs = int(sys.argv[3])
+    learn_rate = float(sys.argv[4])
+    optimizer_name = sys.argv[5]
 
-    ##entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
-    entrenamiento("VGGNet", 32, 20, 0.001, "adam")  # "adam" como string
+    entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
+    #entrenamiento("VGGNet", 32, 20, 0.001, "adam")  # "adam" como string

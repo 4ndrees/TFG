@@ -4,12 +4,16 @@ import shutil
 import zipfile
 import datetime
 import sys
+import os
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.metrics import confusion_matrix, roc_curve, auc
 try:
     import torch
     import tqdm
     import kaggle
 except ImportError:
-    import sys
     import subprocess
     subprocess.run([sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio", "tqdm", "kaggle"])
 
@@ -28,6 +32,68 @@ from torchvision import models
 from torchvision.models import AlexNet_Weights
 from kaggle.api.kaggle_api_extended import KaggleApi #esto falla faltan importaciones
 
+def generar_graficas(historial_completo, carpeta_modelo):
+    # Extraer datos
+    historial_loss = historial_completo["history"]["loss"]
+    historial_acc = historial_completo["history"]["accuracy"]
+    epocas = range(1, len(historial_loss) + 1)
+    
+    vp = historial_completo["metricas"]["VP"]
+    fn = historial_completo["metricas"]["FN"]
+    vn = historial_completo["metricas"]["VN"]
+    fp = historial_completo["metricas"]["FP"]
+    
+    y_real = np.array([1] * (vp + fn) + [0] * (vn + fp))  # Etiquetas reales
+    y_pred = np.array([1] * vp + [0] * fn + [0] * vn + [1] * fp)  # Predicciones
+
+    # -------------------- 1️⃣ Matriz de Confusión --------------------
+    matriz_conf = confusion_matrix(y_real, y_pred)
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(matriz_conf, annot=True, fmt="d", cmap="Blues", xticklabels=["Real", "Fake"], yticklabels=["Real", "Fake"])
+    plt.xlabel("Predicción")
+    plt.ylabel("Valor Real")
+    plt.title("Matriz de Confusión")
+    plt.savefig(os.path.join(carpeta_modelo, "matriz_confusion.jpg"))
+    plt.close()
+
+    # -------------------- 2️⃣ Precisión y Pérdida a lo largo de las épocas --------------------
+    plt.figure(figsize=(8, 5))
+    plt.plot(epocas, historial_acc, label="Precisión", color="blue")
+    plt.plot(epocas, historial_loss, label="Pérdida", color="red")
+    plt.xlabel("Épocas")
+    plt.ylabel("Valor")
+    plt.title("Precisión y Pérdida a lo largo de las épocas")
+    plt.legend()
+    plt.grid()
+    plt.savefig(os.path.join(carpeta_modelo, "precision_perdida.jpg"))
+    plt.close()
+
+    # -------------------- 3️⃣ Curva ROC y AUC --------------------
+    fpr, tpr, _ = roc_curve(y_real, y_pred)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure(figsize=(6, 5))
+    plt.plot(fpr, tpr, color="darkorange", lw=2, label="AUC = {:.2f}".format(roc_auc))
+    plt.plot([0, 1], [0, 1], color="navy", linestyle="--")
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel("Tasa de Falsos Positivos")
+    plt.ylabel("Tasa de Verdaderos Positivos")
+    plt.title("Curva ROC")
+    plt.legend(loc="lower right")
+    plt.savefig(os.path.join(carpeta_modelo, "curva_roc.jpg"))
+    plt.close()
+
+    # -------------------- 4️⃣ Histograma de Predicciones --------------------
+    plt.figure(figsize=(6, 5))
+    sns.histplot(y_pred, bins=3, kde=True, color="purple")
+    plt.xlabel("Clases Predichas")
+    plt.ylabel("Frecuencia")
+    plt.title("Distribución de Predicciones")
+    plt.savefig(os.path.join(carpeta_modelo, "histograma_predicciones.jpg"))
+    plt.close()
+
+    print(f"✅ Gráficas guardadas en {carpeta_modelo}")
 
 def verificar_dataset(dataset_dir):
     print("Comprobando integridad del Dataset")
@@ -43,7 +109,7 @@ def verificar_dataset(dataset_dir):
     
     # Verificar que la carpeta principal existe
     if not os.path.exists(dataset_dir):
-        print(f"Falta la carpeta principal del dataset: {dataset_dir}")
+        print(f"❌ Falta la carpeta principal del dataset: {dataset_dir}")
         return False
 
 
@@ -54,7 +120,7 @@ def verificar_dataset(dataset_dir):
         
         if not os.path.exists(path_carpeta):
             print(path_carpeta)
-            print(" - Faltante\n")
+            print(" - Faltante ❌ \n")
             completo = False
     
         # Verificar subcarpetas dentro de cada una
@@ -62,14 +128,14 @@ def verificar_dataset(dataset_dir):
             path_subcarpeta = os.path.join(path_carpeta, subcarpeta)
             if not os.path.exists(path_subcarpeta):
                 print(path_subcarpeta)
-                print(" - Faltante\n")
+                print(" - Faltante ❌ \n")
                 completo = False
         
     # Verificar archivos CSV
     for archivo in archivos_csv:
         path_archivo = os.path.join(dataset_dir,archivo)
         if not os.path.exists(path_archivo):
-            print(f"Falta el archivo CSV: {path_archivo}")
+            print(f"❌ Falta el archivo CSV: {path_archivo}")
             completo = False
     return completo 
 
@@ -81,7 +147,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
     # Verificar si el dataset ya existe
     if not verificar_dataset(CarpetaDataset_dir):
-        print("Dataset no encontrado o encontrado incompleto :(")
+        print("❌ Dataset no encontrado o encontrado incompleto :(")
         
         if os.path.exists(CarpetaDataset_dir):
             print("Vaciando carpeta dataset para descargar el dataset correctamente...")
@@ -101,7 +167,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         # Descargar el dataset
 
         api.dataset_download_files("xhlulu/140k-real-and-fake-faces", path=os.path.dirname(zip_file_path), unzip=False)
-        print("Descarga completada con exito, lista para descompresión :)")
+        print("✅ Descarga completada con exito, lista para descompresión :)")
         print("Dirección destino de descompresión del Zip: " + CarpetaDataset_dir )
 
         # Extraer el archivo ZIP
@@ -109,13 +175,13 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
             zip_ref.extractall(CarpetaDataset_dir)
         
-        print("Extracción completada con exito :)")
+        print("✅ Extracción completada con exito :)")
 
         # Eliminar el archivo ZIP después de extraerlo
         os.remove(zip_file_path)
-        print("Archivo ZIP eliminado")
+        print("✅ Archivo ZIP eliminado")
 
-    print("El dataset está disponible :) \n\n")
+    print("✅ El dataset está disponible :) \n\n")
       
     # Transformaciones para preparar la imagen (redimensionar, normalizar, etc.)
     transform = transforms.Compose([
@@ -191,6 +257,12 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     print("Evaluando modelo...")
     model.eval()
+    
+    verdaderos_positivos = 0  # VP
+    falsos_negativos = 0       # FN
+    verdaderos_negativos = 0   # VN
+    falsos_positivos = 0       # FP
+    
     correct = 0
     total = 0
     with torch.no_grad():
@@ -201,49 +273,86 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
             correct += (predictions == labels).sum().item()
             total += labels.size(0)
             
+            # Contar verdaderos positivos, falsos negativos, etc.
+            verdaderos_positivos += ((predictions == 1) & (labels == 1)).sum().item()
+            falsos_negativos += ((predictions == 0) & (labels == 1)).sum().item()
+            verdaderos_negativos += ((predictions == 0) & (labels == 0)).sum().item()
+            falsos_positivos += ((predictions == 1) & (labels == 0)).sum().item()
+
+
+            
     
     test_loss = running_loss / len(test_loader)
     test_accuracy = correct / total
+    
+    # Calcular métricas para cada clase
+    precision_real = verdaderos_positivos / (verdaderos_positivos + falsos_positivos + 1E-8)
+    recall_real = verdaderos_positivos / (verdaderos_positivos + falsos_negativos+ 1E-8)
+    f1_real = 2 * (precision_real * recall_real) / (precision_real + recall_real+ 1E-8)
+
+    precision_fake = verdaderos_negativos / (verdaderos_negativos + falsos_negativos+ 1E-8)
+    recall_fake = verdaderos_negativos / (verdaderos_negativos + falsos_positivos+ 1E-8)
+    f1_fake = 2 * (precision_fake * recall_fake) / (precision_fake + recall_fake+ 1E-8)
+
     print(f"Precisión en el conjunto de prueba: {test_accuracy:.4f}, Pérdida en prueba: {test_loss:.4f}")
     
-    fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
+    fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M')
+    carpeta_modelo = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}")
+
+    # 📁 Crear la carpeta del modelo y la subcarpeta para las gráficas
+    os.makedirs(carpeta_modelo, exist_ok=True)
+    print(f"✅ Carpeta para gráficas creada en {os.path.join(carpeta_modelo, 'graficas')}")
 
     
     historial_completo = {
-        "date": fecha_hoy,
-        "name": f"{nombre_modelo}_{fecha_hoy}",
+        "ModeloBase": "ALEXNet",
+        "fecha": fecha_hoy,
+        "NombreModelo": f"{nombre_modelo}_{fecha_hoy}",
+        "PesosModelo":f"{nombre_modelo}.pth",
         "mini_batch_size": mini_batch_size,
         "max_epochs": max_epochs,
         "learn_rate": learn_rate,
         "optimizer": optimizer_name,
         "test_loss": test_loss,
         "test_accuracy": test_accuracy,
+        
+        "metricas": {
+            "VP": verdaderos_positivos,
+            "FN": falsos_negativos,
+            "VN": verdaderos_negativos,
+            "FP": falsos_positivos,
+            "fake": {"F1": f1_fake, "precision": precision_fake, "recall": recall_fake},
+            "real": {"F1": f1_real, "precision": precision_real, "recall": recall_real}
+        },
+        
         "history": {
             "loss": historial_perdida,
             "accuracy": historial_accuracy
         }
     }
     
-    historial_archivo = f"public/historial/{nombre_modelo}_historial.json"
+    historial_archivo = os.path.join(carpeta_modelo, "historial.json")
     
     with open(historial_archivo, 'w') as f:
         json.dump(historial_completo, f)
     
-    print(f"Historial guardado en {historial_archivo}")
+    print(f"✅ Historial guardado en {historial_archivo}")
 
-    modelo_dir = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}.pth")
+    modelo_dir = os.path.join(carpeta_modelo, f"{nombre_modelo}.pth")
     torch.save(model.state_dict(), modelo_dir)
-    print(f"Modelo guardado en {modelo_dir}")
+    print(f"✅ Modelo guardado en {modelo_dir}")
+    
+    generar_graficas(historial_completo, carpeta_modelo)
 
         
 
 if __name__ == "__main__":
     ## Leer argumentos de Node.js
-    nombre_modelo = sys.argv[1]
-    mini_batch_size = int(sys.argv[2])
-    max_epochs = int(sys.argv[3])
-    learn_rate = float(sys.argv[4])
-    optimizer_name = sys.argv[5]
+    #nombre_modelo = sys.argv[1]
+    #mini_batch_size = int(sys.argv[2])
+    #max_epochs = int(sys.argv[3])
+    #learn_rate = float(sys.argv[4])
+    #optimizer_name = sys.argv[5]
 
-    entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
-    #entrenamiento("ALEXNet", 32, 40, 0.001, "adam")  # "adam" como string
+    #entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
+    entrenamiento("ALEXNet", 32, 5, 0.001, "adam")  # "adam" como string

@@ -143,7 +143,7 @@ async function mostrarMetricas(){
     console.log(typeof modeloSeleccionadoNombre);
     var modelo = modeloSeleccionadoNombre.split('_')[0];
     console.log(modelo);
-    fetch(`http://localhost:3000/modelos/${modelo}_historial.json`)
+    fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/historial.json`)
             .then(response => response.json())
             .then(data => {
                 console.log("Datos del entrenamiento recibidos:", data);

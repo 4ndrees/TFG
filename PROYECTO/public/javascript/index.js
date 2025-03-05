@@ -117,10 +117,10 @@ async function mostrarImagen(){
 // de los diferentes json (lo dejo descomentado porque estoy haciendo pruebas)
 // JSON con los datos
 const data = [
-	{ id: 1, nombre: "AlexNet_19-11-24" },
-	{ id: 2, nombre: "ResNet_10-10-24" },
-	{ id: 3, nombre: "VGGNet_10-9-24" },
-	{ id: 3, nombre: "VGGNet_10-10-24" }
+	{ id: 1, nombre: "AlexNet_19-11-24_10.35" },
+	{ id: 2, nombre: "ResNet_10-10-24_10.35" },
+	{ id: 3, nombre: "VGGNet_10-9-24_10.35" },
+	{ id: 3, nombre: "VGGNet_10-10-24_10.35" }
 ];
 
 // Esperar a que el DOM se cargue completamente

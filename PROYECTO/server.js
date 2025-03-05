@@ -76,24 +76,28 @@ app.post('/entrenar', (req, res) => {
     }
   
     try {
-        // Decodificar la imagen base64
-        const buffer = Buffer.from(image, 'base64');
-        const imageTensor = tf.node.decodeImage(buffer);
-
-        // Redimensionar la imagen para que sea compatible con el modelo
+        //eliminar prefijo 64
+        const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, 'base64');
+        //decodificar
+        const imageTensor = tf.browser.fromPixels(buffer);
+        //redimensionar
         const resizedImage = tf.image.resizeBilinear(imageTensor, [227, 227]);
+        //normalizar
         const normalizedImage = resizedImage.div(tf.scalar(255));
+        //expandir dimensiones
+        const input = normalizedImage.expandDims(0); // [1, 227, 227, 3]
 
         // Cargar el modelo previamente entrenado (no tenemos)
         const model = await tf.loadLayersModel('');
 
         // Realizar la predicción
-        const prediction = model.predict(normalizedImage.expandDims(0));
+        const prediction = model.predict(input);
         
-        // Aquí puedes devolver la clase con el valor más alto (dependiendo de tu clasificación)
+        // Aquí devolver la clase con el valor más alto
         const predictedClass = prediction.argMax(-1).dataSync()[0];
 
-        res.json({ predictedClass });
+        return res.json({ predictedClass });
     } catch (error) {
         console.error("Error al clasificar la imagen:", error);
         res.status(500).json({ error: 'Error al clasificar la imagen' });

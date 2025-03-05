@@ -35,51 +35,45 @@
         <section id="info-modelo">
             <div class="info">
                 <div class="columna-info">
-                    <p>Modelo: AlexNet</p>
-                    <p>Fecha de entrenamiento: 19-11-24</p>
-                    <p>Epochs: 50</p>
+                    <p>Modelo: <span id="modelo"></span></p>
+                    <p>Fecha de entrenamiento: <span id="fecha_hora"></span></p>
+                    <p>Epochs: <span id="epochs"></span></p>
                 </div>
                 <div class="columna-info">
-                    <p>Optimizador: Adam</p>
-                    <p>Minibatch Size: 20</p>
-                    <p>Tasa de aprendizaje: 0.03</p>
+                    <p>Optimizador: <span id="optimizer"></span></p>
+                    <p>Minibatch Size: <span id="mini_batch_size"></span></p>
+                    <p>Tasa de aprendizaje: <span id="learn_rate"></span></p>
                 </div>
+            </div>
+            
             </div>
         </section>
         <h2 class="subtitulo">Métricas generales</h2>
         <section id="metricas-generales">
             <h3>Resultados en entrenamiento</h3>
             <div class="metricas">
-                <div class="metricas-elem">
-                    <img src="images/resultados.png" alt="resultados">
+                <div class="metricas-elem" id="metricas-elem">
+                    <img src="images/resultados.png" id="resultados">
                 </div>
             </div>
             <h3>Resultados en test</h3>
             <div class="metricas">
                 <div class="metricas-elem">
                     <table>
-                        <theader>
-                            <th></th>
-                            <th>Precisión</th>
-                            <th>Recall</th>
-                            <th>F1-score</th>
-                        </theader>
-                        <tr>
-                            <td>Fake</td>
-                            <td>0.79</td>
-                            <td>0.81</td>
-                            <td>0.80</td>
-                        </tr>
-                        <tr>
-                            <td>Real</td>
-                            <td>0.81</td>
-                            <td>0.78</td>
-                            <td>0.79</td>
-                        </tr>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Precisión</th>
+                                <th>Recall</th>
+                                <th>F1-score</th>
+                            </tr>
+                        </thead>
+                            <tbody id="metricas-body">
+                        </tbody>
                     </table>
                 </div>
                 <div class="metricas-elem">
-                    <img src="images/confusionMarix.png" alt="resultados-test">
+                    <img src="images/confusionMarix.png" id="resultados-test">
                 </div>
             </div>
         </sectinon>

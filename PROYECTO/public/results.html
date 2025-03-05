@@ -28,10 +28,16 @@
         <h1 class="titulo-seccion">Resultados</h1>
         <section id="resultados">
             <div class="resultados-elem">
-                <img src="images/resultados.png" alt="train-metrics">
+                <h2>Resultados del Entrenamiento</h2>
+                <p><strong>Modelo:</strong> <span id="modelo"></span></p>
+                <p><strong>Precisión:</strong> <span id="precision"></span></p>
+                <p><strong>Pérdida:</strong> <span id="perdida"></span></p>
             </div>
             <div class="resultados-elem">
-                <img src="images/confusionMarix.png" alt="confussion-matrix">
+                <img src="images/resultados.png" id="train-metrics">
+            </div>
+            <div class="resultados-elem">
+                <img src="images/confusionMarix.png" id="confussion-matrix">
             </div>
             <div class="resultados-elem">
                 <a href="./index.html"><button class="custom-btn btn">Volver a inicio</button></a>

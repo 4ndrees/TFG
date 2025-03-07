@@ -43,7 +43,7 @@ def crear_entorno_conda(nombre_entorno, version_python="3.9"):
     entorno_existe = subprocess.run(["conda", "env", "list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
     if nombre_entorno not in entorno_existe.stdout:
-        #print(f"Creando el entorno {nombre_entorno}...")
+        print(f"Creando el entorno {nombre_entorno}...")
         # Si no existe, crearlo
         comando = f"conda create --yes --name {nombre_entorno} python={version_python}"
         proceso = subprocess.run(comando, shell=True, check=True, text=True)
@@ -51,10 +51,10 @@ def crear_entorno_conda(nombre_entorno, version_python="3.9"):
         if proceso.returncode == 0:
             print(f"Entorno {nombre_entorno} creado exitosamente.")
         else:
-            #print(f"Hubo un error al crear el entorno {nombre_entorno}.")
+            print(f"Hubo un error al crear el entorno {nombre_entorno}.")
             sys.exit(1)
-    #else:
-        #print(f"El entorno {nombre_entorno} ya existe.")
+    else:
+        print(f"El entorno {nombre_entorno} ya existe.")
 
 def activar_entorno(nombre_entorno):
     """Función para activar el entorno de conda desde el script."""
@@ -65,7 +65,7 @@ def activar_entorno(nombre_entorno):
         return
 
     # Si no está activado, lo activamos
-    #print(f"Activando el entorno {nombre_entorno}...")
+    print(f"Activando el entorno {nombre_entorno}...")
     
     # Comando para activar el entorno de conda
     if sys.platform == "win32":
@@ -156,7 +156,7 @@ def verificar_dataset(dataset_dir):
     
     # Verificar que la carpeta principal existe
     if not os.path.exists(dataset_dir):
-        #print(f"❌ Falta la carpeta principal del dataset: {dataset_dir}")
+        print(f"❌ Falta la carpeta principal del dataset: {dataset_dir}")
         return False
 
 
@@ -190,11 +190,11 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
  # Obtener el directorio de trabajo actual
     directorio_actual = os.getcwd()
     CarpetaDataset_dir = os.path.join(directorio_actual, "dataset")
-    #print("\nDirección del dataset: " + CarpetaDataset_dir )
+    print("\nDirección del dataset: " + CarpetaDataset_dir )
 
     # Verificar si el dataset ya existe
     if not verificar_dataset(CarpetaDataset_dir):
-        #print("❌ Dataset no encontrado o encontrado incompleto :(")
+        print("❌ Dataset no encontrado o encontrado incompleto :(")
         
         if os.path.exists(CarpetaDataset_dir):
             #print("Vaciando carpeta dataset para descargar el dataset correctamente...")
@@ -248,9 +248,6 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     val_loader = DataLoader(val_dataset, batch_size=mini_batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=mini_batch_size, shuffle=False)
     
-    print(torch.__version__)
-    print(torch.cuda.is_available()) 
-    print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No CUDA device found")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Dispositivo en uso: {device}")
     

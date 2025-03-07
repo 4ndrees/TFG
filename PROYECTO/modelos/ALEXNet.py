@@ -29,7 +29,6 @@ except ImportError:
     import kaggle
 
 from tqdm import tqdm  
-import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
@@ -240,8 +239,6 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
     ])
-
-    print("hasta aqui llego")
     dataset_dir = os.path.join(directorio_actual, r"dataset\real_vs_fake\real-vs-fake")
     train_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'train'), transform=transform)
     val_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'valid'), transform=transform)
@@ -251,6 +248,9 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     val_loader = DataLoader(val_dataset, batch_size=mini_batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=mini_batch_size, shuffle=False)
     
+    print(torch.__version__)
+    print(torch.cuda.is_available()) 
+    print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No CUDA device found")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Dispositivo en uso: {device}")
     
@@ -262,12 +262,10 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     optimizer = optim.Adam(model.parameters(), lr=learn_rate) if optimizer_name.lower() == 'adam' else optim.SGD(model.parameters(), lr=learn_rate, momentum=0.9)
     
-    print("Entrenando modelo...")
     historial_perdida = []
     historial_accuracy = []
     
     for epoch in range(max_epochs):
-        print(f"Hola")
         model.train()
         running_loss = 0.0
         correct_train = 0
@@ -278,10 +276,13 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         with tqdm(train_loader, desc=f"Época {epoch+1}/{max_epochs}", unit="batch") as pbar:
             print(f"Entrenando modelo... {epoch}")
             for images, labels in pbar:
-                print(f"con imagenes")
+                #print(f"con imagenes")
+                
+
                 images, labels = images.to(device), labels.float().to(device)
                 optimizer.zero_grad()
-                outputs = model(images).squeeze()
+                outputs = model(images).view(-1)
+                #print(f"labels shape: {labels.shape}, outputs shape: {outputs.shape}")
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()

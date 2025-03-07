@@ -28,7 +28,7 @@ except ImportError:
     import tqdm
     import kaggle
 
-from tqdm import tqdm  
+from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
@@ -43,29 +43,29 @@ def crear_entorno_conda(nombre_entorno, version_python="3.9"):
     entorno_existe = subprocess.run(["conda", "env", "list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
     if nombre_entorno not in entorno_existe.stdout:
-        print(f"Creando el entorno {nombre_entorno}...")
+        ##print(f"Creando el entorno {nombre_entorno}...")
         # Si no existe, crearlo
         comando = f"conda create --yes --name {nombre_entorno} python={version_python}"
         proceso = subprocess.run(comando, shell=True, check=True, text=True)
         
-        if proceso.returncode == 0:
-            print(f"Entorno {nombre_entorno} creado exitosamente.")
-        else:
-            print(f"Hubo un error al crear el entorno {nombre_entorno}.")
+        if proceso.returncode != 0:
+            #print(f"Entorno {nombre_entorno} creado exitosamente.")
+        #else:
+            #print(f"Hubo un error al crear el entorno {nombre_entorno}.")
             sys.exit(1)
-    else:
-        print(f"El entorno {nombre_entorno} ya existe.")
+    #else:
+        #print(f"El entorno {nombre_entorno} ya existe.")
 
 def activar_entorno(nombre_entorno):
     """Función para activar el entorno de conda desde el script."""
     
     # Verifica si ya estamos en el entorno correcto
     if nombre_entorno in os.environ.get("CONDA_DEFAULT_ENV", ""):
-        print(f"El entorno {nombre_entorno} ya está activado.")
+        #print(f"El entorno {nombre_entorno} ya está activado.")
         return
 
     # Si no está activado, lo activamos
-    print(f"Activando el entorno {nombre_entorno}...")
+    #print(f"Activando el entorno {nombre_entorno}...")
     
     # Comando para activar el entorno de conda
     if sys.platform == "win32":
@@ -140,10 +140,10 @@ def generar_graficas(historial_completo, carpeta_modelo):
     plt.savefig(os.path.join(carpeta_modelo, "histograma_predicciones.jpg"))
     plt.close()
 
-    print(f"✅ Gráficas guardadas en {carpeta_modelo}")
+    #print(f" Gráficas guardadas en {carpeta_modelo}")
 
 def verificar_dataset(dataset_dir):
-    #print("Comprobando integridad del Dataset")
+    ##print("Comprobando integridad del Dataset")
     estructura_correcta = {
         r"real_vs_fake\real-vs-fake": ["train", "valid", "test"],
         r"real_vs_fake\real-vs-fake\train": ["real", "fake"],
@@ -156,7 +156,7 @@ def verificar_dataset(dataset_dir):
     
     # Verificar que la carpeta principal existe
     if not os.path.exists(dataset_dir):
-        print(f"❌ Falta la carpeta principal del dataset: {dataset_dir}")
+        #print(f" Falta la carpeta principal del dataset: {dataset_dir}")
         return False
 
 
@@ -166,23 +166,23 @@ def verificar_dataset(dataset_dir):
         path_carpeta = os.path.join(dataset_dir, carpeta_principal)
         
         if not os.path.exists(path_carpeta):
-            print(path_carpeta)
-            #print(" - Faltante ❌ \n")
+            #print(path_carpeta)
+            ##print(" - Faltante  \n")
             completo = False
     
         # Verificar subcarpetas dentro de cada una
         for subcarpeta in subcarpetas:
             path_subcarpeta = os.path.join(path_carpeta, subcarpeta)
             if not os.path.exists(path_subcarpeta):
-                print(path_subcarpeta)
-                #print(" - Faltante ❌ \n")
+                #print(path_subcarpeta)
+                ##print(" - Faltante  \n")
                 completo = False
         
     # Verificar archivos CSV
     for archivo in archivos_csv:
         path_archivo = os.path.join(dataset_dir,archivo)
         if not os.path.exists(path_archivo):
-            #print(f"❌ Falta el archivo CSV: {path_archivo}")
+            ##print(f" Falta el archivo CSV: {path_archivo}")
             completo = False
     return completo 
 
@@ -190,22 +190,22 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
  # Obtener el directorio de trabajo actual
     directorio_actual = os.getcwd()
     CarpetaDataset_dir = os.path.join(directorio_actual, "dataset")
-    print("\nDirección del dataset: " + CarpetaDataset_dir )
+    #print("\nDirección del dataset: " + CarpetaDataset_dir )
 
     # Verificar si el dataset ya existe
     if not verificar_dataset(CarpetaDataset_dir):
-        print("❌ Dataset no encontrado o encontrado incompleto :(")
+        #print(" Dataset no encontrado o encontrado incompleto :(")
         
         if os.path.exists(CarpetaDataset_dir):
-            #print("Vaciando carpeta dataset para descargar el dataset correctamente...")
+            ##print("Vaciando carpeta dataset para descargar el dataset correctamente...")
             shutil.rmtree(CarpetaDataset_dir)
         
       
         #zip_file_path = r"C:\Users\dcouto\Documents\TFG\PROYECTO\dataset\140k-real-and-fake-faces.zip"  # Ruta del ZIP
         zip_file_path = os.path.join(CarpetaDataset_dir, "140k-real-and-fake-faces.zip")
 
-        print("Dirección destino de descarga del Zip: " + zip_file_path )
-        #print("Descargando desde Kaggle, esto puede tardar unos minutos...")
+        #print("Dirección destino de descarga del Zip: " + zip_file_path )
+        ##print("Descargando desde Kaggle, esto puede tardar unos minutos...")
 
         # Inicializar la API de Kaggle
         api = KaggleApi()
@@ -214,21 +214,21 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         # Descargar el dataset
 
         api.dataset_download_files("xhlulu/140k-real-and-fake-faces", path=os.path.dirname(zip_file_path), unzip=False)
-        #print("✅ Descarga completada con exito, lista para descompresión :)")
-        #print("Dirección destino de descompresión del Zip: " + CarpetaDataset_dir )
+        ##print(" Descarga completada con exito, lista para descompresión :)")
+        ##print("Dirección destino de descompresión del Zip: " + CarpetaDataset_dir )
 
         # Extraer el archivo ZIP
-        #print("Extrayendo archivos...")
+        ##print("Extrayendo archivos...")
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
             zip_ref.extractall(CarpetaDataset_dir)
         
-        #print("✅ Extracción completada con exito :)")
+        ##print(" Extracción completada con exito :)")
 
         # Eliminar el archivo ZIP después de extraerlo
         os.remove(zip_file_path)
-        #print("✅ Archivo ZIP eliminado")
+        ##print(" Archivo ZIP eliminado")
 
-    #print("✅ El dataset está disponible :) \n\n")
+    ##print(" El dataset está disponible :) \n\n")
       
     # Transformaciones para preparar la imagen (redimensionar, normalizar, etc.)
     transform = transforms.Compose([
@@ -243,13 +243,15 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     train_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'train'), transform=transform)
     val_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'valid'), transform=transform)
     test_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'test'), transform=transform)
-    
-    train_loader = DataLoader(train_dataset, batch_size=mini_batch_size, shuffle=True)
+    #prueba para la GPU el batch size es la cantidad de imagenes q procesa la GPU a la vez, con 1 no funciona bien
+    #el num workers es un proceso separado q preprocesa y carga los datos antes de enviarlo a la GPU
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=8, pin_memory=True)
+    #train_loader = DataLoader(train_dataset, batch_size=mini_batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=mini_batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=mini_batch_size, shuffle=False)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Dispositivo en uso: {device}")
+    #print(f"Dispositivo en uso: {device}")
     
     model = models.alexnet(weights=AlexNet_Weights.IMAGENET1K_V1)  # or AlexNet_Weights.DEFAULT
     model.classifier[6] = nn.Linear(4096, 1)  # Reemplaza la última capa de clasificación para adaptarla a una salida binaria (real o fake)
@@ -261,25 +263,27 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     historial_perdida = []
     historial_accuracy = []
-    
+    #print(f"1")
     for epoch in range(max_epochs):
         model.train()
         running_loss = 0.0
         correct_train = 0
         total_train = 0
-        
+        #print(f"2")
+        #print(f"Longitud de train_loader: {len(train_loader)}")
         # Usar tqdm para crear una barra de progreso
         # tqdm(env) se envuelve en el ciclo de entrenamiento para ver el progreso de cada época
-        with tqdm(train_loader, desc=f"Época {epoch+1}/{max_epochs}", unit="batch") as pbar:
-            print(f"Entrenando modelo... {epoch}")
-            for images, labels in pbar:
-                #print(f"con imagenes")
-                
-
+        #with tqdm(train_loader, desc=f"Época {epoch+1}/{max_epochs}", unit="batch") as pbar:
+        x = 0
+        #print(f"Entrenando modelo... {epoch}")
+        for images, labels in train_loader:
+                #print(f"con imagenes" + str(x))
+                x += 1
+        
                 images, labels = images.to(device), labels.float().to(device)
                 optimizer.zero_grad()
                 outputs = model(images).view(-1)
-                #print(f"labels shape: {labels.shape}, outputs shape: {outputs.shape}")
+                ##print(f"labels shape: {labels.shape}, outputs shape: {outputs.shape}")
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
@@ -291,8 +295,9 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
                 total_train += labels.size(0)
                 
                 # Actualizar la barra de progreso con la pérdida actual
-                pbar.set_postfix(loss=running_loss / (len(train_loader) + 1), accuracy=correct_train / total_train)
+                #pbar.set_postfix(loss=running_loss / (len(train_loader) + 1), accuracy=correct_train / total_train)
 
+        #print(f"3")
         # Calcular accuracy de entrenamiento
         train_accuracy = correct_train / total_train
         avg_loss = running_loss / len(train_loader)
@@ -302,9 +307,9 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         historial_accuracy.append(train_accuracy)
 
         # Mostrar el progreso de la época
-        print(f"Época {epoch+1}/{max_epochs}, Pérdida: {avg_loss:.4f}, Accuracy: {train_accuracy:.4f}")
+        #print(f"Época {epoch+1}/{max_epochs}, Pérdida: {avg_loss:.4f}, Accuracy: {train_accuracy:.4f}")
     
-    print("Evaluando modelo...")
+    #print("Evaluando modelo...")
     model.eval()
     
     verdaderos_positivos = 0  # VP
@@ -343,14 +348,14 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     recall_fake = verdaderos_negativos / (verdaderos_negativos + falsos_positivos+ 1E-8)
     f1_fake = 2 * (precision_fake * recall_fake) / (precision_fake + recall_fake+ 1E-8)
 
-    print(f"Precisión en el conjunto de prueba: {test_accuracy:.4f}, Pérdida en prueba: {test_loss:.4f}")
+    #print(f"Precisión en el conjunto de prueba: {test_accuracy:.4f}, Pérdida en prueba: {test_loss:.4f}")
     
     fecha_hoy = datetime.datetime.today().strftime('%d-%m-%Y_%H.%M')
     carpeta_modelo = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}")
 
     # 📁 Crear la carpeta del modelo y la subcarpeta para las gráficas
     os.makedirs(carpeta_modelo, exist_ok=True)
-    print(f"✅ Carpeta para gráficas creada en {os.path.join(carpeta_modelo, 'graficas')}")
+    #print(f" Carpeta para gráficas creada en {os.path.join(carpeta_modelo, 'graficas')}")
 
     
     historial_completo = {
@@ -385,11 +390,11 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     with open(historial_archivo, 'w') as f:
         json.dump(historial_completo, f)
     
-    print(f"✅ Historial guardado en {historial_archivo}")
+    ##print(f" Historial guardado en {historial_archivo}")
 
     modelo_dir = os.path.join(carpeta_modelo, f"{nombre_modelo}.pth")
     torch.save(model.state_dict(), modelo_dir)
-    print(f"✅ Modelo guardado en {modelo_dir}")
+    ##print(f" Modelo guardado en {modelo_dir}")
     
     generar_graficas(historial_completo, carpeta_modelo)
     
@@ -417,6 +422,6 @@ if __name__ == "__main__":
         entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
         #entrenamiento("ALEXNet", 32, 5, 0.001, "adam")  # "adam" como string
     except Exception as e:
-        print(f"Error durante la ejecución: {e}")
+        ##print(f"Error durante la ejecución: {e}")
         sys.exit(1)
   

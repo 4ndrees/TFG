@@ -36,6 +36,7 @@ async function entrenarModelo() {
         // Si todo es exitoso, redirige a la página de resultados
         //modelo seleccionado se tiene q cambiar por el parametro q me devuelva el py con fecha y hora
         const data = await response.json();
+        console.log(data);
         alert(data.message); // Muestra el mensaje de éxito
         window.location.href = `results.html?modelo=${data.output}`;
     }

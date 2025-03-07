@@ -46,7 +46,8 @@ app.post('/entrenar', (req, res) => {
         if (code === 0) {
             console.log('Entrenamiento completado con éxito');
             //aqui envio el nombre del modelo
-            res.status(200).json({ message: 'Entrenamiento completado con éxito', output: stdoutData });
+            console.log('nombreModeloHOLAAQUI:', stdoutData);
+            res.status(200).json({ message: 'Entrenamiento completado con éxito' + stdoutData, output: stdoutData });
         } else {
             console.error(`Error en el script Python con código de salida ${code}`);
             console.error(`Error completo: ${stderrData}`);

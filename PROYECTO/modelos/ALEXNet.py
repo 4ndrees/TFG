@@ -186,7 +186,7 @@ def crear_entorno_conda(nombre_entorno, version_python="3.9"):
         comando = f"conda create --yes --name {nombre_entorno} python={version_python}"
         proceso = subprocess.run(comando, shell=True, check=True, text=True)
         
-        if proceso.returncode == 0:
+        if proceso.returncode != 0:
             print(f"Entorno {nombre_entorno} creado exitosamente.")
         else:
             print(f"Hubo un error al crear el entorno {nombre_entorno}.")
@@ -216,12 +216,14 @@ def activar_entorno(nombre_entorno):
 
     # Ejecutar el proceso para activar el entorno y volver a ejecutar el script
     subprocess.run(comando, shell=True, executable="/bin/bash" if sys.platform != "win32" else None)
-    #sys.exit()
+    sys.exit()
 
 def generar_graficas(historial_completo, carpeta_modelo):
     # Extraer datos
     historial_loss = historial_completo["history"]["loss"]
     historial_acc = historial_completo["history"]["accuracy"]
+    historial_val_accuracy = historial_completo["history"]["val_accuracy"]
+    historial_val_perdida = historial_completo["history"]["val_loss"]
     epocas = range(1, len(historial_loss) + 1)
     
     vp = historial_completo["metricas"]["VP"]
@@ -239,19 +241,21 @@ def generar_graficas(historial_completo, carpeta_modelo):
     plt.xlabel("Predicción")
     plt.ylabel("Valor Real")
     plt.title("Matriz de Confusión")
-    plt.savefig(os.path.join(carpeta_modelo, "matriz_confusion.jpg"))
+    plt.savefig(os.path.join(carpeta_modelo, "confusion_matrix.jpg"))
     plt.close()
 
     # -------------------- 2️⃣ Precisión y Pérdida a lo largo de las épocas --------------------
     plt.figure(figsize=(8, 5))
-    plt.plot(epocas, historial_acc, label="Precisión", color="blue")
-    plt.plot(epocas, historial_loss, label="Pérdida", color="red")
+    plt.plot(epocas, historial_acc, label="Precisión Entrenamiento", color="blue")
+    plt.plot(epocas, historial_loss, label="Pérdida Entrenamiento", color="red")
+    plt.plot(epocas, historial_val_accuracy, label="Precisión Validación", color="green")
+    plt.plot(epocas, historial_val_perdida, label="Pérdida Validación", color="orange")
     plt.xlabel("Épocas")
     plt.ylabel("Valor")
     plt.title("Precisión y Pérdida a lo largo de las épocas")
     plt.legend()
     plt.grid()
-    plt.savefig(os.path.join(carpeta_modelo, "precision_perdida.jpg"))
+    plt.savefig(os.path.join(carpeta_modelo, "train_metrics.jpg"))
     plt.close()
 
     # -------------------- 3️⃣ Curva ROC y AUC --------------------
@@ -267,7 +271,7 @@ def generar_graficas(historial_completo, carpeta_modelo):
     plt.ylabel("Tasa de Verdaderos Positivos")
     plt.title("Curva ROC")
     plt.legend(loc="lower right")
-    plt.savefig(os.path.join(carpeta_modelo, "curva_roc.jpg"))
+    plt.savefig(os.path.join(carpeta_modelo, "resultados_test.jpg"))
     plt.close()
 
     # -------------------- 4️⃣ Histograma de Predicciones --------------------
@@ -276,7 +280,7 @@ def generar_graficas(historial_completo, carpeta_modelo):
     plt.xlabel("Clases Predichas")
     plt.ylabel("Frecuencia")
     plt.title("Distribución de Predicciones")
-    plt.savefig(os.path.join(carpeta_modelo, "histograma_predicciones.jpg"))
+    plt.savefig(os.path.join(carpeta_modelo, "resultados.jpg"))
     plt.close()
 
     #print(f" Gráficas guardadas en {carpeta_modelo}")
@@ -493,8 +497,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
         # Mostrar resultados de validación
         print(f"Época {epoch+1}/{max_epochs}, Pérdida de validación: {avg_val_loss:.4f}, Accuracy de validación: {val_accuracy:.4f}")
-        print("Evaluando modelo...")
-        model.eval()
+    print("Evaluando modelo...")
+    model.eval()
     
     verdaderos_positivos = 0  # VP
     falsos_negativos = 0       # FN
@@ -565,7 +569,9 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         
         "history": {
             "loss": historial_perdida,
-            "accuracy": historial_accuracy
+            "accuracy": historial_accuracy,
+            "val_accuracy": historial_val_accuracy,
+            "val_loss": historial_val_perdida
         }
     }
     
@@ -581,7 +587,23 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     ##print(f" Modelo guardado en {modelo_dir}")
     
     generar_graficas(historial_completo, carpeta_modelo)
-    
+    # Ruta del archivo JSON
+    modelos_entrenados_path = os.path.join(directorio_actual, "modelos", "ModelosEntrenados.json")
+
+    # Leer el archivo JSON si existe, de lo contrario, crear una lista vacía
+    if os.path.exists(modelos_entrenados_path):
+        with open(modelos_entrenados_path, 'r') as f:
+            modelos_entrenados = json.load(f)
+    else:
+        modelos_entrenados = []
+
+    # Añadir el nuevo modelo a la lista
+    modelos_entrenados.append(f"{nombre_modelo}_{fecha_hoy}")
+
+    # Guardar la lista actualizada en el archivo JSON
+    with open(modelos_entrenados_path, 'w') as f:
+        json.dump(modelos_entrenados, f)
+
     print(json.dumps(f"{nombre_modelo}_{fecha_hoy}"))
     sys.stdout.flush()
    
@@ -618,14 +640,14 @@ if __name__ == "__main__":
             print("2. Asegúrate de que los drivers NVIDIA están instalados correctamente")
             print("3. Considera instalar CUDA Toolkit manualmente desde la web de NVIDIA")
         ## Leer argumentos de Node.js
-        #nombre_modelo = sys.argv[1]
-        #mini_batch_size = int(sys.argv[2])
-        #max_epochs = int(sys.argv[3])
-        #learn_rate = float(sys.argv[4])
-        #optimizer_name = sys.argv[5]
+        nombre_modelo = sys.argv[1]
+        mini_batch_size = int(sys.argv[2])
+        max_epochs = int(sys.argv[3])
+        learn_rate = float(sys.argv[4])
+        optimizer_name = sys.argv[5]
 
-        #entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
-        entrenamiento("AlexNet", 32, 5, 0.001, "adam")  # "adam" como string
+        entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
+        #entrenamiento("AlexNet", 32, 1, 0.001, "adam")  # "adam" como string
     except Exception as e:
         print(f"Error durante la ejecución: {e}")
         sys.exit(1)

@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import shutil
 import zipfile
@@ -39,23 +40,159 @@ from torchvision import models
 from torchvision.models import AlexNet_Weights
 from kaggle.api.kaggle_api_extended import KaggleApi #esto falla faltan importaciones
 
+def get_cuda_version():
+    """Detecta la versión de CUDA disponible en el sistema."""
+    try:
+        # Intenta obtener información usando nvidia-smi
+        result = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        if result.returncode != 0:
+            print("No se pudo ejecutar nvidia-smi. GPU NVIDIA no detectada o drivers no instalados.")
+            return None
+            
+        # Buscar la versión de CUDA en la salida
+        match = re.search(r'CUDA Version: (\d+\.\d+)', result.stdout)
+        if match:
+            return match.group(1)
+        
+        # Si no encontramos la versión en nvidia-smi, intentamos con nvcc
+        result = subprocess.run(['nvcc', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        if result.returncode == 0:
+            match = re.search(r'release (\d+\.\d+)', result.stdout)
+            if match:
+                return match.group(1)
+        
+        print("No se pudo determinar la versión de CUDA.")
+        return None
+        
+    except FileNotFoundError:
+        print("Herramientas NVIDIA no encontradas. GPU NVIDIA no detectada o drivers no instalados.")
+        return None
+
+def install_pytorch(cuda_version=None):
+    """Instala la versión adecuada de PyTorch basada en la versión de CUDA."""
+    
+    # Verificar si PyTorch ya está instalado
+    try:
+
+        print(f"PyTorch ya está instalado: {torch.__version__}")
+        
+        if torch.cuda.is_available():
+            print(f"CUDA ya está disponible en PyTorch. Versión CUDA: {torch.version.cuda}")
+            print(f"GPU detectada: {torch.cuda.get_device_name(0)}")
+            return True
+        else:
+            print("PyTorch está instalado pero sin soporte CUDA. Se reinstalará con soporte CUDA.")
+            # Desinstalar versión actual
+            subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "torch", "torchvision", "torchaudio"])
+    except ImportError:
+        print("PyTorch no está instalado. Procediendo a instalar...")
+    
+    # Mapeo de versiones de CUDA a comandos de instalación de PyTorch
+    cuda_mapping = {
+        # Formato: 'major.minor': 'cu<major><minor>'
+        '12.1': 'cu121',
+        '12.0': 'cu121',  # Usar cu121 para 12.0 también
+        '11.8': 'cu118',
+        '11.7': 'cu117',
+        '11.6': 'cu116',
+        '11.5': 'cu115',
+        '11.4': 'cu115',  # Usar cu115 para 11.4
+        '11.3': 'cu113',
+        '11.2': 'cu113',  # Usar cu113 para 11.2
+        '11.1': 'cu111',
+        '11.0': 'cu110',
+        '10.2': 'cu102',
+        '10.1': 'cu101',
+        '10.0': 'cu100',
+    }
+    
+    if cuda_version is None:
+        print("No se pudo detectar CUDA. Instalando versión de PyTorch solo para CPU.")
+        install_cmd = [sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio"]
+    else:
+        # Obtener la parte principal de la versión (e.g., "11.8" desde "11.8.0")
+        major_minor = '.'.join(cuda_version.split('.')[:2])
+        
+        # Determinar la compilación de PyTorch adecuada
+        if major_minor in cuda_mapping:
+            cuda_tag = cuda_mapping[major_minor]
+            print(f"Instalando PyTorch con soporte para CUDA {major_minor} (tag: {cuda_tag})...")
+            install_cmd = [
+                sys.executable, 
+                "-m", 
+                "pip", 
+                "install", 
+                "torch", 
+                "torchvision", 
+                "torchaudio", 
+                "--index-url", 
+                f"https://download.pytorch.org/whl/{cuda_tag}"
+            ]
+        elif float(major_minor) >= 12.2:
+            # Para versiones más nuevas que las mapeadas, usar la más reciente compatible
+            print(f"CUDA {major_minor} es más reciente que las versiones mapeadas. Usando la compilación más reciente (cu121)...")
+            install_cmd = [
+                sys.executable, 
+                "-m", 
+                "pip", 
+                "install", 
+                "torch", 
+                "torchvision", 
+                "torchaudio", 
+                "--index-url", 
+                "https://download.pytorch.org/whl/cu121"
+            ]
+        else:
+            # Para versiones más antiguas, usar la más compatible
+            print(f"CUDA {major_minor} es más antiguo que las versiones mapeadas. Instalando versión solo para CPU...")
+            install_cmd = [sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio"]
+    
+    # Ejecutar la instalación
+    print("Ejecutando comando de instalación:")
+    print(" ".join(install_cmd))
+    subprocess.run(install_cmd, check=True)
+    
+    # Verificar la instalación
+    try:
+        
+        import importlib
+        importlib.reload(torch)  
+        print(f"\nPyTorch instalado: {torch.__version__}")
+        
+        if torch.cuda.is_available():
+            print(f"CUDA disponible: Sí")
+            print(f"Versión CUDA: {torch.version.cuda}")
+            print(f"GPU detectada: {torch.cuda.get_device_name(0)}")
+            return True
+        else:
+            print("¡ADVERTENCIA! PyTorch se instaló pero CUDA no está disponible.")
+            return False
+            
+    except ImportError:
+        print("Error: No se pudo importar PyTorch después de la instalación.")
+        return False
+
+
+
 def crear_entorno_conda(nombre_entorno, version_python="3.9"):
     # Verificar si el entorno existe
     entorno_existe = subprocess.run(["conda", "env", "list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     if nombre_entorno not in entorno_existe.stdout:
-       # print(f"Creando el entorno {nombre_entorno}...")
+        print(f"Creando el entorno {nombre_entorno}...")
         # Si no existe, crearlo
         comando = f"conda create --yes --name {nombre_entorno} python={version_python}"
         proceso = subprocess.run(comando, shell=True, check=True, text=True)
         
-        if proceso.returncode != 0:
+        if proceso.returncode == 0:
             print(f"Entorno {nombre_entorno} creado exitosamente.")
         else:
-            #print(f"Hubo un error al crear el entorno {nombre_entorno}.")
+            print(f"Hubo un error al crear el entorno {nombre_entorno}.")
             sys.exit(1)
-    #else:
-        #print(f"El entorno {nombre_entorno} ya existe.")
+    else:
+        print(f"El entorno {nombre_entorno} ya existe.")
 
 def activar_entorno(nombre_entorno):
     """Función para activar el entorno de conda desde el script."""
@@ -67,7 +204,7 @@ def activar_entorno(nombre_entorno):
     subprocess.run(["conda", "init"], check=True)
 
     # Si no está activado, lo activamos
-    #print(f"Activando el entorno {nombre_entorno}...")
+    print(f"Activando el entorno {nombre_entorno}...")
     
     # Comando para activar el entorno de conda
     if sys.platform == "win32":
@@ -154,7 +291,7 @@ def verificar_dataset(dataset_dir):
     
     # Verificar que la carpeta principal existe
     if not os.path.exists(dataset_dir):
-        #print(f" Falta la carpeta principal del dataset: {dataset_dir}")
+        print(f" Falta la carpeta principal del dataset: {dataset_dir}")
         return False
 
 
@@ -164,16 +301,16 @@ def verificar_dataset(dataset_dir):
         path_carpeta = os.path.join(dataset_dir, carpeta_principal)
         
         if not os.path.exists(path_carpeta):
-            #print(path_carpeta)
-            #print(" - Faltante  \n")
+            print(path_carpeta)
+            print(" - Faltante  \n")
             completo = False
     
         # Verificar subcarpetas dentro de cada una
         for subcarpeta in subcarpetas:
             path_subcarpeta = os.path.join(path_carpeta, subcarpeta)
             if not os.path.exists(path_subcarpeta):
-                #print(path_subcarpeta)
-                #print(" - Faltante  \n")
+                print(path_subcarpeta)
+                print(" - Faltante  \n")
                 completo = False
         
     # Verificar archivos CSV
@@ -183,21 +320,21 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
  # Obtener el directorio de trabajo actual
     directorio_actual = os.getcwd()
     CarpetaDataset_dir = os.path.join(directorio_actual, "dataset")
-    #print("\nDirección del dataset: " + CarpetaDataset_dir )
+    print("\nDirección del dataset: " + CarpetaDataset_dir )
 
     # Verificar si el dataset ya existe
     if not verificar_dataset(CarpetaDataset_dir):
-        #print(" Dataset no encontrado o encontrado incompleto :(")
+        print(" Dataset no encontrado o encontrado incompleto :(")
         
         if os.path.exists(CarpetaDataset_dir):
-            #print("Vaciando carpeta dataset para descargar el dataset correctamente...")
+            print("Vaciando carpeta dataset para descargar el dataset correctamente...")
             shutil.rmtree(CarpetaDataset_dir)
         
       
         zip_file_path = os.path.join(CarpetaDataset_dir, "140k-real-and-fake-faces.zip")
 
-        #print("Dirección destino de descarga del Zip: " + zip_file_path )
-        #print("Descargando desde Kaggle, esto puede tardar unos minutos...")
+        print("Dirección destino de descarga del Zip: " + zip_file_path )
+        print("Descargando desde Kaggle, esto puede tardar unos minutos...")
 
         # Inicializar la API de Kaggle
         api = KaggleApi()
@@ -206,19 +343,19 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         # Descargar el dataset
 
         api.dataset_download_files("gauravduttakiit/140k-real-and-fake-faces", path=os.path.dirname(zip_file_path), unzip=False)
-        #print(" Descarga completada con exito, lista para descompresión :)")
-        #print("Dirección destino de descompresión del Zip: " + CarpetaDataset_dir )
+        print(" Descarga completada con exito, lista para descompresión :)")
+        print("Dirección destino de descompresión del Zip: " + CarpetaDataset_dir )
 
         # Extraer el archivo ZIP
-        #print("Extrayendo archivos...")
+        print("Extrayendo archivos...")
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
             zip_ref.extractall(CarpetaDataset_dir)
         
-        #print(" Extracción completada con exito :)")
+        print(" Extracción completada con exito :)")
 
         # Eliminar el archivo ZIP después de extraerlo
         os.remove(zip_file_path)
-        #print(" Archivo ZIP eliminado")
+        print(" Archivo ZIP eliminado")
         
         # Directorios
         test_dir = os.path.join(CarpetaDataset_dir, "test")
@@ -243,9 +380,9 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         # Mover la mitad de las imágenes de test/fake a valid/fake
         mover_mitad(os.path.join(test_dir, "fake"), os.path.join(valid_dir, "fake"))
 
-        #print("División de test en validación completada con éxito :)")
+        print("División de test en validación completada con éxito :)")
 
-   # print(" El dataset está disponible :) \n\n")
+    print(" El dataset está disponible :) \n\n")
       
     # Transformaciones para preparar la imagen (redimensionar, normalizar, etc.)
     transform = transforms.Compose([
@@ -268,7 +405,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     test_loader = DataLoader(test_dataset, batch_size=mini_batch_size, shuffle=False)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #print(f"Dispositivo en uso: {device}")
+    print(f"Dispositivo en uso: {device}")
     
     model = models.alexnet(weights=AlexNet_Weights.IMAGENET1K_V1)  # or AlexNet_Weights.DEFAULT
     model.classifier[6] = nn.Linear(4096, 1)  # Reemplaza la última capa de clasificación para adaptarla a una salida binaria (real o fake)
@@ -326,7 +463,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         historial_accuracy.append(train_accuracy)
 
         # Mostrar el progreso de la época
-        #print(f"Época {epoch+1}/{max_epochs}, Pérdida: {avg_loss:.4f}, Accuracy: {train_accuracy:.4f}")
+        print(f"Época {epoch+1}/{max_epochs}, Pérdida: {avg_loss:.4f}, Accuracy: {train_accuracy:.4f}")
         # Fase de validación (desactivar gradientes para ahorrar memoria y tiempo)
         model.eval()
         running_val_loss = 0.0
@@ -355,8 +492,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         historial_val_accuracy.append(val_accuracy)
 
         # Mostrar resultados de validación
-        #print(f"Época {epoch+1}/{max_epochs}, Pérdida de validación: {avg_val_loss:.4f}, Accuracy de validación: {val_accuracy:.4f}")
-        #print("Evaluando modelo...")
+        print(f"Época {epoch+1}/{max_epochs}, Pérdida de validación: {avg_val_loss:.4f}, Accuracy de validación: {val_accuracy:.4f}")
+        print("Evaluando modelo...")
         model.eval()
     
     verdaderos_positivos = 0  # VP
@@ -458,23 +595,28 @@ if __name__ == "__main__":
         activar_entorno(nombre_entorno)
 
         
-       # print(f"Python version: {sys.version}")
-       # print(f"PyTorch version: {torch.__version__}")
+        print(f"Python version: {sys.version}")
+        print(f"PyTorch version: {torch.__version__}")
 
-       # if torch.cuda.is_available():
-       #     print(f"CUDA is available!")
-       #     print(f"CUDA version: {torch.version.cuda}")
-       #     print(f"GPU device: {torch.cuda.get_device_name(0)}")
-       #     print(f"GPU count: {torch.cuda.device_count()}")
-       #     # Prueba simple para verificar que CUDA funciona
-       #     x = torch.tensor([1.0, 2.0, 3.0]).cuda()
-       #     print(f"Tensor en GPU: {x}")
-       #     print(f"Dispositivo del tensor: {x.device}")
-       # else:
-       #     print("CUDA NO está disponible. PyTorch usará CPU solamente.")
-       #     print("\nInformación de diagnóstico:")
-       #     print(f"- PyTorch compilado con CUDA: {torch.backends.cudnn.enabled if hasattr(torch.backends, 'cudnn') else 'No'}")
+        print("Verificando versión de CUDA...")
+        cuda_version = get_cuda_version()
         
+        if cuda_version:
+            print(f"Versión de CUDA detectada: {cuda_version}")
+        else:
+            print("No se detectó CUDA en el sistema.")
+        
+        # Instalar PyTorch según la versión de CUDA
+        success = install_pytorch(cuda_version)
+        
+        if success:
+            print("\nPyTorch se ha instalado correctamente con soporte CUDA.")
+        else:
+            print("\nLa instalación de PyTorch con soporte CUDA ha fallado o CUDA no está disponible.")
+            print("Recomendaciones:")
+            print("1. Verifica que tienes una GPU NVIDIA compatible")
+            print("2. Asegúrate de que los drivers NVIDIA están instalados correctamente")
+            print("3. Considera instalar CUDA Toolkit manualmente desde la web de NVIDIA")
         ## Leer argumentos de Node.js
         #nombre_modelo = sys.argv[1]
         #mini_batch_size = int(sys.argv[2])

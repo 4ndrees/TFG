@@ -4,6 +4,7 @@ import shutil
 import zipfile
 import datetime
 import sys
+import random
 import subprocess
 try:
     import matplotlib.pyplot as plt
@@ -41,16 +42,16 @@ from kaggle.api.kaggle_api_extended import KaggleApi #esto falla faltan importac
 def crear_entorno_conda(nombre_entorno, version_python="3.9"):
     # Verificar si el entorno existe
     entorno_existe = subprocess.run(["conda", "env", "list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    
+
     if nombre_entorno not in entorno_existe.stdout:
-        ##print(f"Creando el entorno {nombre_entorno}...")
+       # print(f"Creando el entorno {nombre_entorno}...")
         # Si no existe, crearlo
         comando = f"conda create --yes --name {nombre_entorno} python={version_python}"
         proceso = subprocess.run(comando, shell=True, check=True, text=True)
         
         if proceso.returncode != 0:
-            #print(f"Entorno {nombre_entorno} creado exitosamente.")
-        #else:
+            print(f"Entorno {nombre_entorno} creado exitosamente.")
+        else:
             #print(f"Hubo un error al crear el entorno {nombre_entorno}.")
             sys.exit(1)
     #else:
@@ -63,6 +64,7 @@ def activar_entorno(nombre_entorno):
     if nombre_entorno in os.environ.get("CONDA_DEFAULT_ENV", ""):
         #print(f"El entorno {nombre_entorno} ya está activado.")
         return
+    subprocess.run(["conda", "init"], check=True)
 
     # Si no está activado, lo activamos
     #print(f"Activando el entorno {nombre_entorno}...")
@@ -145,14 +147,10 @@ def generar_graficas(historial_completo, carpeta_modelo):
 def verificar_dataset(dataset_dir):
     ##print("Comprobando integridad del Dataset")
     estructura_correcta = {
-        r"real_vs_fake\real-vs-fake": ["train", "valid", "test"],
-        r"real_vs_fake\real-vs-fake\train": ["real", "fake"],
-        r"real_vs_fake\real-vs-fake\valid": ["real", "fake"],
-        r"real_vs_fake\real-vs-fake\test": ["real", "fake"],
+        r"train": ["real", "fake"],
+        r"test": ["real", "fake"],
+        r"valid": ["real", "fake"]
     }
-
-    # Lista de archivos CSV que deben existir
-    archivos_csv = ["train.csv", "valid.csv", "test.csv"]
     
     # Verificar que la carpeta principal existe
     if not os.path.exists(dataset_dir):
@@ -167,7 +165,7 @@ def verificar_dataset(dataset_dir):
         
         if not os.path.exists(path_carpeta):
             #print(path_carpeta)
-            ##print(" - Faltante  \n")
+            #print(" - Faltante  \n")
             completo = False
     
         # Verificar subcarpetas dentro de cada una
@@ -175,15 +173,10 @@ def verificar_dataset(dataset_dir):
             path_subcarpeta = os.path.join(path_carpeta, subcarpeta)
             if not os.path.exists(path_subcarpeta):
                 #print(path_subcarpeta)
-                ##print(" - Faltante  \n")
+                #print(" - Faltante  \n")
                 completo = False
         
     # Verificar archivos CSV
-    for archivo in archivos_csv:
-        path_archivo = os.path.join(dataset_dir,archivo)
-        if not os.path.exists(path_archivo):
-            ##print(f" Falta el archivo CSV: {path_archivo}")
-            completo = False
     return completo 
 
 def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name):
@@ -197,15 +190,14 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         #print(" Dataset no encontrado o encontrado incompleto :(")
         
         if os.path.exists(CarpetaDataset_dir):
-            ##print("Vaciando carpeta dataset para descargar el dataset correctamente...")
+            #print("Vaciando carpeta dataset para descargar el dataset correctamente...")
             shutil.rmtree(CarpetaDataset_dir)
         
       
-        #zip_file_path = r"C:\Users\dcouto\Documents\TFG\PROYECTO\dataset\140k-real-and-fake-faces.zip"  # Ruta del ZIP
         zip_file_path = os.path.join(CarpetaDataset_dir, "140k-real-and-fake-faces.zip")
 
         #print("Dirección destino de descarga del Zip: " + zip_file_path )
-        ##print("Descargando desde Kaggle, esto puede tardar unos minutos...")
+        #print("Descargando desde Kaggle, esto puede tardar unos minutos...")
 
         # Inicializar la API de Kaggle
         api = KaggleApi()
@@ -213,22 +205,47 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
         # Descargar el dataset
 
-        api.dataset_download_files("xhlulu/140k-real-and-fake-faces", path=os.path.dirname(zip_file_path), unzip=False)
-        ##print(" Descarga completada con exito, lista para descompresión :)")
-        ##print("Dirección destino de descompresión del Zip: " + CarpetaDataset_dir )
+        api.dataset_download_files("gauravduttakiit/140k-real-and-fake-faces", path=os.path.dirname(zip_file_path), unzip=False)
+        #print(" Descarga completada con exito, lista para descompresión :)")
+        #print("Dirección destino de descompresión del Zip: " + CarpetaDataset_dir )
 
         # Extraer el archivo ZIP
-        ##print("Extrayendo archivos...")
+        #print("Extrayendo archivos...")
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
             zip_ref.extractall(CarpetaDataset_dir)
         
-        ##print(" Extracción completada con exito :)")
+        #print(" Extracción completada con exito :)")
 
         # Eliminar el archivo ZIP después de extraerlo
         os.remove(zip_file_path)
-        ##print(" Archivo ZIP eliminado")
+        #print(" Archivo ZIP eliminado")
+        
+        # Directorios
+        test_dir = os.path.join(CarpetaDataset_dir, "test")
+        valid_dir = os.path.join(CarpetaDataset_dir, "valid")
 
-    ##print(" El dataset está disponible :) \n\n")
+        # Crear carpetas valid/real y valid/fake
+        os.makedirs(os.path.join(valid_dir, "real"), exist_ok=True)
+        os.makedirs(os.path.join(valid_dir, "fake"), exist_ok=True)
+
+        # Función para mover la mitad de las imágenes de test a valid
+        def mover_mitad(origen, destino):
+            archivos = os.listdir(origen)
+            random.shuffle(archivos)  # Mezclar aleatoriamente los archivos
+            mitad = len(archivos) // 2  # Calcular la mitad
+
+            for archivo in archivos[:mitad]:  # Mover la mitad de los archivos
+                shutil.move(os.path.join(origen, archivo), os.path.join(destino, archivo))
+
+        # Mover la mitad de las imágenes de test/real a valid/real
+        mover_mitad(os.path.join(test_dir, "real"), os.path.join(valid_dir, "real"))
+
+        # Mover la mitad de las imágenes de test/fake a valid/fake
+        mover_mitad(os.path.join(test_dir, "fake"), os.path.join(valid_dir, "fake"))
+
+        #print("División de test en validación completada con éxito :)")
+
+   # print(" El dataset está disponible :) \n\n")
       
     # Transformaciones para preparar la imagen (redimensionar, normalizar, etc.)
     transform = transforms.Compose([
@@ -239,7 +256,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
     ])
-    dataset_dir = os.path.join(directorio_actual, r"dataset\real_vs_fake\real-vs-fake")
+    dataset_dir = os.path.join(directorio_actual, "dataset")
     train_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'train'), transform=transform)
     val_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'valid'), transform=transform)
     test_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'test'), transform=transform)
@@ -263,6 +280,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     historial_perdida = []
     historial_accuracy = []
+    historial_val_accuracy = []
+    historial_val_perdida = []
     #print(f"1")
     for epoch in range(max_epochs):
         model.train()
@@ -308,9 +327,37 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
         # Mostrar el progreso de la época
         #print(f"Época {epoch+1}/{max_epochs}, Pérdida: {avg_loss:.4f}, Accuracy: {train_accuracy:.4f}")
-    
-    #print("Evaluando modelo...")
-    model.eval()
+        # Fase de validación (desactivar gradientes para ahorrar memoria y tiempo)
+        model.eval()
+        running_val_loss = 0.0
+        correct_val = 0
+        total_val = 0
+
+        with torch.no_grad():  # No calculamos gradientes para la validación
+            for val_images, val_labels in val_loader:
+                val_images, val_labels = val_images.to(device), val_labels.float().to(device)
+
+                val_outputs = model(val_images).view(-1)
+                val_loss = criterion(val_outputs, val_labels)
+                running_val_loss += val_loss.item()
+
+                # Calcular precisión durante la validación
+                val_predictions = (torch.sigmoid(val_outputs) > 0.5).float()
+                correct_val += (val_predictions == val_labels).sum().item()
+                total_val += val_labels.size(0)
+        
+        # Cálculo de la precisión de validación y pérdida promedio
+        val_accuracy = correct_val / total_val
+        avg_val_loss = running_val_loss / len(val_loader)
+
+        # Almacenar en los históricos de validación
+        historial_val_perdida.append(avg_val_loss)
+        historial_val_accuracy.append(val_accuracy)
+
+        # Mostrar resultados de validación
+        #print(f"Época {epoch+1}/{max_epochs}, Pérdida de validación: {avg_val_loss:.4f}, Accuracy de validación: {val_accuracy:.4f}")
+        #print("Evaluando modelo...")
+        model.eval()
     
     verdaderos_positivos = 0  # VP
     falsos_negativos = 0       # FN
@@ -410,18 +457,34 @@ if __name__ == "__main__":
         crear_entorno_conda(nombre_entorno)
         activar_entorno(nombre_entorno)
 
+        
+       # print(f"Python version: {sys.version}")
+       # print(f"PyTorch version: {torch.__version__}")
+
+       # if torch.cuda.is_available():
+       #     print(f"CUDA is available!")
+       #     print(f"CUDA version: {torch.version.cuda}")
+       #     print(f"GPU device: {torch.cuda.get_device_name(0)}")
+       #     print(f"GPU count: {torch.cuda.device_count()}")
+       #     # Prueba simple para verificar que CUDA funciona
+       #     x = torch.tensor([1.0, 2.0, 3.0]).cuda()
+       #     print(f"Tensor en GPU: {x}")
+       #     print(f"Dispositivo del tensor: {x.device}")
+       # else:
+       #     print("CUDA NO está disponible. PyTorch usará CPU solamente.")
+       #     print("\nInformación de diagnóstico:")
+       #     print(f"- PyTorch compilado con CUDA: {torch.backends.cudnn.enabled if hasattr(torch.backends, 'cudnn') else 'No'}")
+        
         ## Leer argumentos de Node.js
-        nombre_modelo = sys.argv[1]
-        mini_batch_size = int(sys.argv[2])
-        max_epochs = int(sys.argv[3])
-        learn_rate = float(sys.argv[4])
-        optimizer_name = sys.argv[5]
+        #nombre_modelo = sys.argv[1]
+        #mini_batch_size = int(sys.argv[2])
+        #max_epochs = int(sys.argv[3])
+        #learn_rate = float(sys.argv[4])
+        #optimizer_name = sys.argv[5]
 
-
-
-        entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
-        #entrenamiento("ALEXNet", 32, 5, 0.001, "adam")  # "adam" como string
+        #entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
+        entrenamiento("AlexNet", 32, 5, 0.001, "adam")  # "adam" como string
     except Exception as e:
-        ##print(f"Error durante la ejecución: {e}")
+        print(f"Error durante la ejecución: {e}")
         sys.exit(1)
   

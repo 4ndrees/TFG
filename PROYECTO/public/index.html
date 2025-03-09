@@ -21,9 +21,9 @@
         <h1 class="titulo">I.A. vs. Realidad</h1>
         <h2 class="subtitulo">Modelos guardados</h2>
         <div>
-            <select id="modelos-guardados" onchange="seleccionarModelo()"></select>
+            <select id="modelos-guardados" onchange="guardarModelo()"></select>
         </div>
-        <a href="./metrics.html"><button class="custom-btn btn">Mostrar métricas</button></a>
+        <button class="custom-btn btn" onclick="mostrar()">Mostrar métricas</button>
         <h2 class="subtitulo">Entrenamiento</h2>
         <a href="./train.html"><button class="custom-btn btn">Entrenar</button></a>
         <h2 class="subtitulo">Test</h2>
@@ -32,5 +32,13 @@
 
     <script src="javascript/index.js"></script>
     <script src="app.js"></script>
+    <script>
+        function mostrar() {
+            const select = document.getElementById("modelos-guardados");
+            const modeloSeleccionado = select.value;
+
+            window.location.href = "./metrics.html?modelo=" + modeloSeleccionado;
+        }
+    </script>
 </body>
 </html>

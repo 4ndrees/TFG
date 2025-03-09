@@ -127,11 +127,10 @@ async function mostrarResultados(){
 }
 
 
-async function mostrarMetricas(){
-    modeloSeleccionadoNombre = await seleccionarModelo();
+async function mostrarMetricas(modeloSeleccionadoNombre){
     const modelo = modeloSeleccionadoNombre.split('_')[0];
     var fecha_hora = modeloSeleccionadoNombre.split('_')[1] + " " + modeloSeleccionadoNombre.split('_')[2];
-    console.log(fecha_hora);
+
     fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/historial.json`)
             .then(response => response.json())
             .then(data => {
@@ -202,17 +201,17 @@ async function seleccionarModelo(){
     const select = document.getElementById("modelos-guardados");
     const modeloSeleccionado = select.value;
 
-    let modeloSeleccionadoNombre = data.find(modelo => modelo.id == modeloSeleccionado);
-
-    console.log("Modelo seleccionado:", modeloSeleccionadoNombre.nombre);
-
-    return modeloSeleccionadoNombre.nombre;
-
+    return modeloSeleccionado;
 }
 
+async function guardarModelo(){
+    modeloMetricas = await seleccionarModelo();
+}
 
 async function cambiarModelo(){
-    mostrarMetricas();
+    modeloSeleccionadoNombre = await seleccionarModelo();
+
+    mostrarMetricas(modeloSeleccionadoNombre);
 }
 
 async function cambiarModelo2(){ 

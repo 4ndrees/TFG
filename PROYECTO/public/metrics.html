@@ -85,8 +85,12 @@
     </article>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            console.log("Página cargada");
-            mostrarMetricas();
+            const urlParams = new URLSearchParams(window.location.search);
+        
+            const modeloSeleccionado = urlParams.get("modelo");
+            console.log(modeloSeleccionado);
+
+            mostrarMetricas(modeloSeleccionado);
         });
     </script>
 </body>

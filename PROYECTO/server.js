@@ -67,6 +67,7 @@ app.post('/entrenar', (req, res) => {
             error: err.message
         });
     });
+    
 });
 
   // Ruta para clasificar usando el modelo entrenado

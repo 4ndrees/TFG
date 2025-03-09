@@ -116,23 +116,39 @@ async function mostrarImagen(){
 // En vez de el json data que he hecho de prueba recorres toda la carpeta modelos buscando id y nombre
 // de los diferentes json (lo dejo descomentado porque estoy haciendo pruebas)
 // JSON con los datos
-const data = [
-	{ id: 1, nombre: "AlexNet_19-11-24_10.35" },
+const data2 = [
+	/*{ id: 1, nombre: "AlexNet_19-11-24_10.35" },
 	{ id: 2, nombre: "ResNet_10-10-24_10.35" },
 	{ id: 3, nombre: "VGGNet_10-9-24_10.35" },
-	{ id: 3, nombre: "VGGNet_10-10-24_10.35" }
+	{ id: 3, nombre: "VGGNet_10-10-24_10.35" }*/
 ];
 
-// Esperar a que el DOM se cargue completamente
-document.addEventListener("DOMContentLoaded", () => {
-	// Referencia al select
+async function cargarModelos(){
 	const menu = document.getElementById("modelos-guardados");
 
-	// Poblar el select con opciones
-	data.forEach(item => {
-		let option = document.createElement("option");
-		option.value = item.id;
-		option.textContent = item.nombre;
-		menu.appendChild(option);
-	});
+	fetch(`http://localhost:3000/modelos/ModelosEntrenados.json`)
+		.then(response => {
+			if (!response.ok) {
+			throw new Error(`Error HTTP! Código: ${response.status}`);
+			}
+			return response.json(); // Convertimos la respuesta a JSON
+		})
+		.then(data => {
+			console.log("Datos recibidos:", data);
+			data.forEach(item => {
+				let option = document.createElement("option");
+				option.value = item;
+				option.textContent = item;
+				menu.appendChild(option);
+			});
+		})
+		.catch(error => {
+			console.error("Error al obtener el JSON:", error);
+		});
+}
+
+
+// Esperar a que el DOM se cargue completamente
+document.addEventListener("DOMContentLoaded", async () => {
+	await cargarModelos();
 });

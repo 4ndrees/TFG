@@ -43,19 +43,7 @@ from kaggle.api.kaggle_api_extended import KaggleApi #esto falla faltan importac
 def get_cuda_version():
     """Detecta la versión de CUDA disponible en el sistema."""
     try:
-        # Intenta obtener información usando nvidia-smi
-        result = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
-        if result.returncode != 0:
-            print("No se pudo ejecutar nvidia-smi. GPU NVIDIA no detectada o drivers no instalados.")
-            return None
-            
-        # Buscar la versión de CUDA en la salida
-        match = re.search(r'CUDA Version: (\d+\.\d+)', result.stdout)
-        if match:
-            return match.group(1)
-        
-        # Si no encontramos la versión en nvidia-smi, intentamos con nvcc
+       
         result = subprocess.run(['nvcc', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         
         if result.returncode == 0:
@@ -186,7 +174,7 @@ def crear_entorno_conda(nombre_entorno, version_python="3.9"):
         comando = f"conda create --yes --name {nombre_entorno} python={version_python}"
         proceso = subprocess.run(comando, shell=True, check=True, text=True)
         
-        if proceso.returncode != 0:
+        if proceso.returncode == 0:
             print(f"Entorno {nombre_entorno} creado exitosamente.")
         else:
             print(f"Hubo un error al crear el entorno {nombre_entorno}.")

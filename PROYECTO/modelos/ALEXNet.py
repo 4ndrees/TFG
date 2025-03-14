@@ -19,16 +19,17 @@ except ImportError:
     import seaborn as sns
     import numpy as np
     from sklearn.metrics import confusion_matrix, roc_curve, auc
-try:
-    import torch
-    import tqdm
-    import kaggle
-except ImportError:
-    subprocess.run([sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio", "tqdm", "kaggle"])
 
-    import torch
-    import tqdm
-    import kaggle
+try:
+     import torch
+     import tqdm
+     import kaggle
+except ImportError:
+     subprocess.run([sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio", "tqdm", "kaggle"])
+ 
+     import torch
+     import tqdm
+     import kaggle
 
 from tqdm import tqdm
 import torch.nn as nn
@@ -38,131 +39,7 @@ import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 from torchvision import models
 from torchvision.models import AlexNet_Weights
-from kaggle.api.kaggle_api_extended import KaggleApi #esto falla faltan importaciones
-
-def get_cuda_version():
-    """Detecta la versión de CUDA disponible en el sistema."""
-    try:
-       
-        result = subprocess.run(['nvcc', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
-        if result.returncode == 0:
-            match = re.search(r'release (\d+\.\d+)', result.stdout)
-            if match:
-                return match.group(1)
-        
-        print("No se pudo determinar la versión de CUDA.")
-        return None
-        
-    except FileNotFoundError:
-        print("Herramientas NVIDIA no encontradas. GPU NVIDIA no detectada o drivers no instalados.")
-        return None
-
-def install_pytorch(cuda_version=None):
-    """Instala la versión adecuada de PyTorch basada en la versión de CUDA."""
-    
-    # Verificar si PyTorch ya está instalado
-    try:
-
-        print(f"PyTorch ya está instalado: {torch.__version__}")
-        
-        if torch.cuda.is_available():
-            print(f"CUDA ya está disponible en PyTorch. Versión CUDA: {torch.version.cuda}")
-            print(f"GPU detectada: {torch.cuda.get_device_name(0)}")
-            return True
-        else:
-            print("PyTorch está instalado pero sin soporte CUDA. Se reinstalará con soporte CUDA.")
-            # Desinstalar versión actual
-            subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "torch", "torchvision", "torchaudio"])
-    except ImportError:
-        print("PyTorch no está instalado. Procediendo a instalar...")
-    
-    # Mapeo de versiones de CUDA a comandos de instalación de PyTorch
-    cuda_mapping = {
-        # Formato: 'major.minor': 'cu<major><minor>'
-        '12.1': 'cu121',
-        '12.0': 'cu121',  # Usar cu121 para 12.0 también
-        '11.8': 'cu118',
-        '11.7': 'cu117',
-        '11.6': 'cu116',
-        '11.5': 'cu115',
-        '11.4': 'cu115',  # Usar cu115 para 11.4
-        '11.3': 'cu113',
-        '11.2': 'cu113',  # Usar cu113 para 11.2
-        '11.1': 'cu111',
-        '11.0': 'cu110',
-        '10.2': 'cu102',
-        '10.1': 'cu101',
-        '10.0': 'cu100',
-    }
-    
-    if cuda_version is None:
-        print("No se pudo detectar CUDA. Instalando versión de PyTorch solo para CPU.")
-        install_cmd = [sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio"]
-    else:
-        # Obtener la parte principal de la versión (e.g., "11.8" desde "11.8.0")
-        major_minor = '.'.join(cuda_version.split('.')[:2])
-        
-        # Determinar la compilación de PyTorch adecuada
-        if major_minor in cuda_mapping:
-            cuda_tag = cuda_mapping[major_minor]
-            print(f"Instalando PyTorch con soporte para CUDA {major_minor} (tag: {cuda_tag})...")
-            install_cmd = [
-                sys.executable, 
-                "-m", 
-                "pip", 
-                "install", 
-                "torch", 
-                "torchvision", 
-                "torchaudio", 
-                "--index-url", 
-                f"https://download.pytorch.org/whl/{cuda_tag}"
-            ]
-        elif float(major_minor) >= 12.2:
-            # Para versiones más nuevas que las mapeadas, usar la más reciente compatible
-            print(f"CUDA {major_minor} es más reciente que las versiones mapeadas. Usando la compilación más reciente (cu121)...")
-            install_cmd = [
-                sys.executable, 
-                "-m", 
-                "pip", 
-                "install", 
-                "torch", 
-                "torchvision", 
-                "torchaudio", 
-                "--index-url", 
-                "https://download.pytorch.org/whl/cu121"
-            ]
-        else:
-            # Para versiones más antiguas, usar la más compatible
-            print(f"CUDA {major_minor} es más antiguo que las versiones mapeadas. Instalando versión solo para CPU...")
-            install_cmd = [sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio"]
-    
-    # Ejecutar la instalación
-    print("Ejecutando comando de instalación:")
-    print(" ".join(install_cmd))
-    subprocess.run(install_cmd, check=True)
-    
-    # Verificar la instalación
-    try:
-        
-        import importlib
-        importlib.reload(torch)  
-        print(f"\nPyTorch instalado: {torch.__version__}")
-        
-        if torch.cuda.is_available():
-            print(f"CUDA disponible: Sí")
-            print(f"Versión CUDA: {torch.version.cuda}")
-            print(f"GPU detectada: {torch.cuda.get_device_name(0)}")
-            return True
-        else:
-            print("¡ADVERTENCIA! PyTorch se instaló pero CUDA no está disponible.")
-            return False
-            
-    except ImportError:
-        print("Error: No se pudo importar PyTorch después de la instalación.")
-        return False
-
-
+from kaggle.api.kaggle_api_extended import KaggleApi
 
 def crear_entorno_conda(nombre_entorno, version_python="3.9"):
     # Verificar si el entorno existe
@@ -181,30 +58,24 @@ def crear_entorno_conda(nombre_entorno, version_python="3.9"):
             sys.exit(1)
     else:
         print(f"El entorno {nombre_entorno} ya existe.")
+        return
 
 def activar_entorno(nombre_entorno):
     """Función para activar el entorno de conda desde el script."""
     
-    # Verifica si ya estamos en el entorno correcto
-    if nombre_entorno in os.environ.get("CONDA_DEFAULT_ENV", ""):
-        #print(f"El entorno {nombre_entorno} ya está activado.")
-        return
-    subprocess.run(["conda", "init"], check=True)
+    # Verificar si ya estamos en el entorno correcto
+    if nombre_entorno == os.environ.get("CONDA_DEFAULT_ENV", ""):
+        print(f"El entorno {nombre_entorno} ya está activado.")
 
-    # Si no está activado, lo activamos
-    print(f"Activando el entorno {nombre_entorno}...")
-    
-    # Comando para activar el entorno de conda
     if sys.platform == "win32":
-        # Windows
-        comando = f"conda activate {nombre_entorno} && python {sys.argv[0]}"
+         # Windows
+         comando = f"conda activate {nombre_entorno} && set"
     else:
         # Linux / Mac
-        comando = f"source activate {nombre_entorno} && python {sys.argv[0]}"
-
+        comando = f"source activate {nombre_entorno} && env"
+ 
     # Ejecutar el proceso para activar el entorno y volver a ejecutar el script
     subprocess.run(comando, shell=True, executable="/bin/bash" if sys.platform != "win32" else None)
-    sys.exit()
 
 def generar_graficas(historial_completo, carpeta_modelo):
     # Extraer datos
@@ -309,6 +180,7 @@ def verificar_dataset(dataset_dir):
     return completo 
 
 def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name):
+    
  # Obtener el directorio de trabajo actual
     directorio_actual = os.getcwd()
     CarpetaDataset_dir = os.path.join(directorio_actual, "dataset")
@@ -391,6 +263,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     test_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'test'), transform=transform)
     #prueba para la GPU el batch size es la cantidad de imagenes q procesa la GPU a la vez, con 1 no funciona bien
     #el num workers es un proceso separado q preprocesa y carga los datos antes de enviarlo a la GPU
+    #ESTO HAY QUE CAMBIARLO ANTES DE HACER PRUEBAS
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=8, pin_memory=True)
     #train_loader = DataLoader(train_dataset, batch_size=mini_batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=mini_batch_size, shuffle=False)
@@ -417,7 +290,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         running_loss = 0.0
         correct_train = 0
         total_train = 0
-        #print(f"2")
+        #çprint(f"2")
         #print(f"Longitud de train_loader: {len(train_loader)}")
         # Usar tqdm para crear una barra de progreso
         # tqdm(env) se envuelve en el ciclo de entrenamiento para ver el progreso de cada época
@@ -592,41 +465,14 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     with open(modelos_entrenados_path, 'w') as f:
         json.dump(modelos_entrenados, f)
 
-    print(json.dumps(f"{nombre_modelo}_{fecha_hoy}"))
+    #sys.stdout.flush()
+    print(f"{nombre_modelo}_{fecha_hoy}")
     sys.stdout.flush()
    
-
         
 
 if __name__ == "__main__":
     try:
-        nombre_entorno = "entorno_tfg"
-        crear_entorno_conda(nombre_entorno)
-        activar_entorno(nombre_entorno)
-
-        
-        print(f"Python version: {sys.version}")
-        print(f"PyTorch version: {torch.__version__}")
-
-        print("Verificando versión de CUDA...")
-        cuda_version = get_cuda_version()
-        
-        if cuda_version:
-            print(f"Versión de CUDA detectada: {cuda_version}")
-        else:
-            print("No se detectó CUDA en el sistema.")
-        
-        # Instalar PyTorch según la versión de CUDA
-        success = install_pytorch(cuda_version)
-        
-        if success:
-            print("\nPyTorch se ha instalado correctamente con soporte CUDA.")
-        else:
-            print("\nLa instalación de PyTorch con soporte CUDA ha fallado o CUDA no está disponible.")
-            print("Recomendaciones:")
-            print("1. Verifica que tienes una GPU NVIDIA compatible")
-            print("2. Asegúrate de que los drivers NVIDIA están instalados correctamente")
-            print("3. Considera instalar CUDA Toolkit manualmente desde la web de NVIDIA")
         ## Leer argumentos de Node.js
         nombre_modelo = sys.argv[1]
         mini_batch_size = int(sys.argv[2])
@@ -634,9 +480,30 @@ if __name__ == "__main__":
         learn_rate = float(sys.argv[4])
         optimizer_name = sys.argv[5]
 
+        nombre_entorno = "entorno_tfg"
+        crear_entorno_conda(nombre_entorno)
+        activar_entorno(nombre_entorno)
+
+        
+        # cuda_version = get_cuda_version()
+        
+        # if cuda_version:
+        #     print(f"Versión de CUDA detectada: {cuda_version}")
+        #     success = install_pytorch(cuda_version)
+        #     if success:
+        #         print("\nPyTorch se ha instalado correctamente con soporte CUDA.")
+        #     else:
+        #         print("\nLa instalación de PyTorch con soporte CUDA ha fallado o CUDA no está disponible.")
+        #         print("Recomendaciones:")
+        #         print("1. Verifica que tienes una GPU NVIDIA compatible")
+        #         print("2. Asegúrate de que los drivers NVIDIA están instalados correctamente")
+        #         print("3. Considera instalar CUDA Toolkit manualmente desde la web de NVIDIA")
+        # else:
+        #     print("No se detectó CUDA en el sistema.")
+        
+
         entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
         #entrenamiento("AlexNet", 32, 1, 0.001, "adam")  # "adam" como string
     except Exception as e:
-        print(f"Error durante la ejecución: {e}")
-        sys.exit(1)
+        raise Exception(f"Error durante la ejecución: {e}")
   

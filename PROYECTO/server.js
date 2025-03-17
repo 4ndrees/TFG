@@ -4,6 +4,8 @@ const tf = require('@tensorflow/tfjs');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+
 
 
 // Crear una instancia de la aplicación Express
@@ -21,79 +23,6 @@ app.use('/modelos', express.static(path.join(__dirname, 'modelos')));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// app.post('/entrenar', (req, res) => {
-//     //parametros
-//     const { nombreModelo, miniBatchSize, maxEpochs, learnRate, optimizerName } = req.body;
-
-//     console.log(`Entrenando modelo: ${nombreModelo}`);
-//     console.log(`Mini-Batch Size: ${miniBatchSize}, Max Epochs: ${maxEpochs}, Learning Rate: ${learnRate}, Optimizer: ${optimizerName}`);
-
-//     // Ejecutar el script de Python con los parámetross
-//     const python_ = spawn('python', [path.join(__dirname, 'modelos', `${nombreModelo}_CUDA.py`)]);
-
-//     python_.stdout.on('data', (data) => {
-//         console.log(`stdout: ${data.toString()}`);
-//     });
-
-//     python_.stderr.on('data', (data) => {
-//         console.error(`stderr: ${data.toString()}`);
-//     });
-//     python_.on('error', (err) => {
-//         // En caso de que haya un error al iniciar el proceso Python
-//         console.error('Error al ejecutar CUDA:', err);
-//         res.status(500).json({
-//             message: 'Error al iniciar el proceso Python',
-//         });
-//     });
-    
-//     const python = spawn('python', [`./modelos/${nombreModelo}.py`, nombreModelo, miniBatchSize, maxEpochs, learnRate, optimizerName]);
-
-//     let stdoutData = ''; // Acumula los datos de stdout
-//     let stderrData = ''; // Acumula los datos de stderr
-//     let lineas = [];
-//     let finalname = '';
-
-//     // Capturar la salida estándar del script Python
-//     python.stdout.on('data', (data) => {
-//     finalname = lineas[lineas.length - 1];
-//         console.log(`stdout: ${data.toString()}`);
-//         lineas = stdoutData.trim().split("\n");
-//         finalname = lineas[lineas.length - 1];
-//     });
-//     // Capturar la salida de error estándar del script Python
-//     python.stderr.on('data', (data) => {
-//         stderrData += data.toString();
-//         console.error(`stderr: ${data.toString()}`);
-//     });
-
-//     // Evento cuando el proceso Python finaliza
-//     python.on('close', (code) => {
-//         if (code === 0) {
-//             console.log('Entrenamiento completado con éxito');
-//             //aqui envio el nombre del modelo
-//             res.status(200).json({ message: 'Entrenamiento completado con éxito ' + finalname, output: finalname });
-//         } else {
-//             console.error(`Error en el script Python con código de salida ${code}`);
-//             console.error(`Error completo: ${stderrData}`);
-//             res.status(500).json({
-//                 message: 'Hubo un error al ejecutar el script de entrenamiento',
-//                 error: stderrData
-//             });
-//         }
-//     });
-
-//     //si falla el script
-//     python.on('error', (err) => {
-//         // En caso de que haya un error al iniciar el proceso Python
-//         console.error('Error al ejecutar el proceso Python:', err);
-//         res.status(500).json({
-//             message: 'Error al iniciar el proceso Python',
-//             error: err.message
-//         });
-//     });
-    
-// });
 
 app.post('/entrenar', async (req, res) => {
     // Parámetros
@@ -166,20 +95,49 @@ app.post('/entrenar', async (req, res) => {
   
     if (!image) {
       return res.status(400).json({ error: 'No se proporcionó imagen' });
-    }
+  }
   
     try {
-        
-        // Cargar el modelo previamente entrenado (no tenemos)
-        const model = await tf.loadLayersModel('');
+        const tempDir = path.join(__dirname, 'temp');
+        if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+        }
 
-        // Realizar la predicción
-        const prediction = model.predict(image);
-        
-        // Aquí devolver la clase con el valor más alto
-        const predictedClass = prediction.argMax(-1).dataSync()[0];
+        const imageBuffer = Buffer.from(image, 'base64');
+        const imageName = `temp_${crypto.randomBytes(6).toString('hex')}.jpg`;
+        const imagePath = path.join(__dirname, 'temp', imageName);
 
-        return res.json({ predictedClass });
+        fs.writeFileSync(imagePath, imageBuffer);
+
+        let proceso = spawn('python', [path.join(__dirname, 'modelos', `clasificar.py`), nombreModelo, imagePath]);
+        
+        let stdoutData = '';
+        let stderrData = '';
+
+        proceso.stdout.on('data', (data) => {
+            stdoutData += data.toString();
+        });
+
+        proceso.stderr.on('data', (data) => {
+            stderrData += data.toString();
+            console.error(`Error en clasificar.py: ${data.toString()}`);
+        });
+
+        proceso.on('close', (code) => {
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+
+            if (code !== 0) {
+                return res.status(500).json({ error: 'Error en la clasificación', details: stderrData });
+            }
+
+            const lineas = stdoutData.trim().split("\n");
+            const predictedClass = lineas[lineas.length - 1] || "ClaseNoDefinida";
+
+            return res.json({ predictedClass });
+        });
+
     } catch (error) {
         console.error("Error al clasificar la imagen:", error);
         res.status(500).json({ error: 'Error al clasificar la imagen' });

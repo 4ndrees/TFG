@@ -191,10 +191,8 @@ async function mostrarImagen(file, predictedClass) {
             <p>Clase Predicha: <strong>${predictedClass}</strong></p>
         `;
     };
-
     // Leer el archivo como una URL
-    reader.readAsDataURL(file);
-                
+    reader.readAsDataURL(file);          
 }
 
 async function seleccionarModelo(){

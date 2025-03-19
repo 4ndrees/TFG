@@ -408,7 +408,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
     
     historial_completo = {
-        "ModeloBase": "ALEXNet",
+        "ModeloBase": "AlexNet",
         "fecha": fecha_hoy,
         "NombreModelo": f"{nombre_modelo}_{fecha_hoy}",
         "PesosModelo":f"{nombre_modelo}.pth",

@@ -260,21 +260,16 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     )
     
     
-   # history = model.fit(
-    #    train_generator,
-    #    steps_per_epoch=train_generator.samples // train_generator.batch_size,
-    #    validation_data=val_generator,
-    #    validation_steps=val_generator.samples // val_generator.batch_size,
-    #    epochs=max_epochs
-    #)
+    history = model.fit(
+        train_generator,
+        steps_per_epoch=train_generator.samples // train_generator.batch_size,
+        validation_data=val_generator,
+        validation_steps=val_generator.samples // val_generator.batch_size,
+        epochs=max_epochs
+    )
     
     # Guardar el historial y parámetros en un archivo JSON
-    history_dict = {
-    "loss": [],
-    "accuracy": [],
-    "val_loss": [],
-    "val_accuracy": []    
-    }#history.history
+    history_dict = history.history
   
 
     # Evaluar el modelo en el conjunto de test

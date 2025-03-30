@@ -108,6 +108,11 @@ app.post('/entrenar', async (req, res) => {
         const imagePath = path.join(__dirname, 'temp', imageName);
 
         fs.writeFileSync(imagePath, imageBuffer);
+        
+        console.log("Parámetros enviados a clasificar.py:", {
+            nombreModelo: nombreModelo,
+            imagePath: imagePath,
+        });
 
         let proceso = spawn('python', [path.join(__dirname, 'modelos', `clasificar.py`), nombreModelo, imagePath]);
         
@@ -120,7 +125,7 @@ app.post('/entrenar', async (req, res) => {
 
         proceso.stderr.on('data', (data) => {
             stderrData += data.toString();
-            console.error(`Error en clasificar.py: ${data.toString()}`);
+            console.error(`Error/Warning en clasificar.py: ${data.toString()}`);
         });
 
         proceso.on('close', (code) => {

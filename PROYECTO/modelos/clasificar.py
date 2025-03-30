@@ -113,7 +113,7 @@ def cargar_modelo_y_predecir(model_name, imagen_base64):
         
     # Generar resultado
     resultado = "REAL" if prediccion > 0.5 else "FALSE"
-    print(json.dumps(resultado))
+    print(resultado)
     sys.stdout.flush()
 
 def imagen_a_base64(ruta_imagen, formato='JPEG', incluir_prefijo=True):
@@ -160,11 +160,12 @@ if __name__ == "__main__":
         sys.exit(1)
         
     model_name = sys.argv[1]
-    imagen_base64 = sys.argv[2]
-    
+    print(model_name)
+    ruta = sys.argv[2]
+    print(ruta)
     try:
         # Convertir la imagen a base64 (Para pruebas con el .py solo)
-        # imagen_base64 = imagen_a_base64(imagen_base64)
+        imagen_base64 = imagen_a_base64(ruta)
         
         # Llamar a la función con la imagen en base64
         cargar_modelo_y_predecir(model_name, imagen_base64)

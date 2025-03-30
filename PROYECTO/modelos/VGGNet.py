@@ -1,221 +1,88 @@
 import os
-import re
-import json
 import shutil
 import zipfile
-import datetime
-import sys
+import json
+import datetime  
 import random
-import subprocess
-try:
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import numpy as np
-    from sklearn.metrics import confusion_matrix, roc_curve, auc
-except ImportError:
-    subprocess.run([sys.executable, "-m", "pip", "install", "matplotlib", "seaborn", "numpy", "scikit-learn"])
-
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import numpy as np
-    from sklearn.metrics import confusion_matrix, roc_curve, auc
-try:
-    import tensorflow as tf
-    import kaggle
-except ImportError:
-    import subprocess
-    import sys
-    subprocess.run([sys.executable, "-m", "pip", "install", "tensorflow", "kaggle"])
-    import tensorflow as tf
-    import kaggle
-
-
-
+import sys
+from kaggle.api.kaggle_api_extended import KaggleApi
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.optimizers import Adam, SGD
 import tensorflow as tf
 from tensorflow.keras import layers, models
-from kaggle.api.kaggle_api_extended import KaggleApi #esto falla faltan importaciones
+import numpy as np
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, roc_curve, auc
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-
-
-def get_cuda_version():
-    """Detecta la versión de CUDA disponible en el sistema."""
-    try:
-        # Intenta obtener información usando nvidia-smi
-        result = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
-        if result.returncode != 0:
-            print("No se pudo ejecutar nvidia-smi. GPU NVIDIA no detectada o drivers no instalados.")
-            return None
-            
-        # Buscar la versión de CUDA en la salida
-        match = re.search(r'CUDA Version: (\d+\.\d+)', result.stdout)
-        if match:
-            return match.group(1)
-        
-        # Si no encontramos la versión en nvidia-smi, intentamos con nvcc
-        result = subprocess.run(['nvcc', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
-        if result.returncode == 0:
-            match = re.search(r'release (\d+\.\d+)', result.stdout)
-            if match:
-                return match.group(1)
-        
-        print("No se pudo determinar la versión de CUDA.")
-        return None
-        
-    except FileNotFoundError:
-        print("Herramientas NVIDIA no encontradas. GPU NVIDIA no detectada o drivers no instalados.")
-        return None
-
-def install_tensorflow_for_cuda(cuda_version=None):
-    """
-    Instala la versión adecuada de TensorFlow basada en la versión de CUDA detectada.
-
-    """
-    # Si no se proporciona versión de CUDA, intentamos detectarla
-    if cuda_version is None:
-        cuda_version = get_cuda_version()
-        
-    if cuda_version is None:
-        print("No se pudo detectar la versión de CUDA. Asegúrate de que CUDA esté instalado correctamente.")
-        return False
+def generar_graficas(historial_completo, carpeta_modelo):
+    # Extraer datos
+    historial_loss = historial_completo["history"]["loss"]
+    historial_acc = historial_completo["history"]["accuracy"]
+    historial_val_accuracy = historial_completo["history"]["val_accuracy"]
+    historial_val_perdida = historial_completo["history"]["val_loss"]
+    epocas = range(1, len(historial_loss) + 1)
     
-    print(f"Versión de CUDA detectada: {cuda_version}")
+    vp = historial_completo["metricas"]["VP"]
+    fn = historial_completo["metricas"]["FN"]
+    vn = historial_completo["metricas"]["VN"]
+    fp = historial_completo["metricas"]["FP"]
     
-    # Mapeo de versiones de CUDA a versiones de TensorFlow
-    # Basado en la documentación oficial: https://www.tensorflow.org/install/source#gpu
-    cuda_tf_mapping = {
-        # Versiones anteriores
-        "10.0": "tensorflow-gpu==1.13.1",
-        "10.1": "tensorflow-gpu==1.15.0",
-        "10.2": "tensorflow-gpu==2.3.0",
-        
-        # CUDA 11.x
-        "11.0": "tensorflow==2.4.0",
-        "11.1": "tensorflow==2.4.0",
-        "11.2": "tensorflow==2.5.0",
-        "11.3": "tensorflow==2.7.0",
-        "11.4": "tensorflow==2.8.0",
-        "11.5": "tensorflow==2.9.0",
-        "11.6": "tensorflow==2.10.0",
-        "11.7": "tensorflow==2.11.0",
-        "11.8": "tensorflow==2.12.0",
-        
-        # CUDA 12.x
-        "12.0": "tensorflow==2.13.0",
-        "12.1": "tensorflow==2.14.0",
-        "12.2": "tensorflow==2.15.0",
-        "12.3": "tensorflow==2.16.0",
-        "12.4": "tensorflow==2.17.0",
-        "12.5": "tensorflow==2.18.0",
-        "12.6": "tensorflow==2.19.0",
-        "12.7": "tensorflow==2.19.0",
-        "12.8": "tensorflow==2.10.0",  # Versión más reciente para CUDA 12.8
-    }
-    
- 
-    if cuda_version in cuda_tf_mapping:
-        tf_version = cuda_tf_mapping[cuda_version]
-    # Si encontramos una versión parcial (por ejemplo, "11" para CUDA 11.x)
-    elif cuda_version.split('.')[0] in ["11", "12"]:
-        major_version = cuda_version.split('.')[0]
-        compatible_versions = {v: k for k, v in cuda_tf_mapping.items() if k.startswith(major_version)}
-        if compatible_versions:
-            # Usar la última versión compatible
-            latest_compatible = max(compatible_versions.keys())
-            tf_version = compatible_versions[latest_compatible]
-            print(f"Versión exacta de CUDA no encontrada. Usando versión compatible: {latest_compatible}")
-        else:
-            print(f"No se encontró una versión compatible de TensorFlow para CUDA {cuda_version}")
-            return False
-    else:
-        print(f"No se encontró una versión compatible de TensorFlow para CUDA {cuda_version}")
-        return False
-    
-    # Instalar la versión correspondiente de TensorFlow
-    print(f"Instalando {tf_version}...")
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", tf_version])
-        print(f"TensorFlow ({tf_version}) instalado correctamente.")
-        
-        # Verificar la instalación
-        verify_installation()
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error al instalar TensorFlow: {e}")
-        return False
+    y_real = np.array([1] * (vp + fn) + [0] * (vn + fp))  # Etiquetas reales
+    y_pred = np.array([1] * vp + [0] * fn + [0] * vn + [1] * fp)  # Predicciones
 
-def verify_installation():
-    """
-    Verifica que TensorFlow se haya instalado correctamente y pueda acceder a la GPU.
-    """
-    try:
-        import tensorflow as tf
-        print(f"TensorFlow versión: {tf.__version__}")
-        
-        # Verificar si hay GPUs disponibles
-        gpus = tf.config.list_physical_devices('GPU')
-        if gpus:
-            print(f"GPUs disponibles: {len(gpus)}")
-            for gpu in gpus:
-                print(f"  - {gpu}")
-        else:
-            print("No se detectaron GPUs para TensorFlow. Verifica la instalación de CUDA y cuDNN.")
-        
-        # Mostrar información sobre TensorFlow
-        print("\nInformación de la compilación de TensorFlow:")
-        print(tf.sysconfig.get_build_info())
-    except ImportError:
-        print("No se pudo importar TensorFlow. La instalación puede haber fallado.")
-    except Exception as e:
-        print(f"Error al verificar la instalación: {e}")
+    # -------------------- 1️⃣ Matriz de Confusión --------------------
+    matriz_conf = confusion_matrix(y_real, y_pred)
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(matriz_conf, annot=True, fmt="d", cmap="Blues", xticklabels=["Real", "Fake"], yticklabels=["Real", "Fake"])
+    plt.xlabel("Predicción")
+    plt.ylabel("Valor Real")
+    plt.title("Matriz de Confusión")
+    plt.savefig(os.path.join(carpeta_modelo, "confusion_matrix.jpg"))
+    plt.close()
 
+    # -------------------- 2️⃣ Precisión y Pérdida a lo largo de las épocas --------------------
+    plt.figure(figsize=(8, 5))
+    plt.plot(epocas, historial_acc, label="Precisión Entrenamiento", color="blue")
+    plt.plot(epocas, historial_loss, label="Pérdida Entrenamiento", color="red")
+    plt.plot(epocas, historial_val_accuracy, label="Precisión Validación", color="green")
+    plt.plot(epocas, historial_val_perdida, label="Pérdida Validación", color="orange")
+    plt.xlabel("Épocas")
+    plt.ylabel("Valor")
+    plt.title("Precisión y Pérdida a lo largo de las épocas")
+    plt.legend()
+    plt.grid()
+    plt.savefig(os.path.join(carpeta_modelo, "train_metrics.jpg"))
+    plt.close()
 
-def crear_entorno_conda(nombre_entorno, version_python="3.9"):
-    # Verificar si el entorno existe
-    entorno_existe = subprocess.run(["conda", "env", "list"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    # -------------------- 3️⃣ Curva ROC y AUC --------------------
+    fpr, tpr, _ = roc_curve(y_real, y_pred)
+    roc_auc = auc(fpr, tpr)
 
-    if nombre_entorno not in entorno_existe.stdout:
-        print(f"Creando el entorno {nombre_entorno}...")
-        # Si no existe, crearlo
-        comando = f"conda create --yes --name {nombre_entorno} python={version_python}"
-        proceso = subprocess.run(comando, shell=True, check=True, text=True)
-        
-        if proceso.returncode != 0:
-            print(f"Entorno {nombre_entorno} creado exitosamente.")
-        else:
-            print(f"Hubo un error al crear el entorno {nombre_entorno}.")
-            sys.exit(1)
-    else:
-        print(f"El entorno {nombre_entorno} ya existe.")
+    plt.figure(figsize=(6, 5))
+    plt.plot(fpr, tpr, color="darkorange", lw=2, label="AUC = {:.2f}".format(roc_auc))
+    plt.plot([0, 1], [0, 1], color="navy", linestyle="--")
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel("Tasa de Falsos Positivos")
+    plt.ylabel("Tasa de Verdaderos Positivos")
+    plt.title("Curva ROC")
+    plt.legend(loc="lower right")
+    plt.savefig(os.path.join(carpeta_modelo, "resultados_test.jpg"))
+    plt.close()
 
-def activar_entorno(nombre_entorno):
-    """Función para activar el entorno de conda desde el script."""
-    
-    # Verifica si ya estamos en el entorno correcto
-    if nombre_entorno in os.environ.get("CONDA_DEFAULT_ENV", ""):
-        #print(f"El entorno {nombre_entorno} ya está activado.")
-        return
-    subprocess.run(["conda", "init"], check=True)
+    # -------------------- 4️⃣ Histograma de Predicciones --------------------
+    plt.figure(figsize=(6, 5))
+    sns.histplot(y_pred, bins=3, kde=True, color="purple")
+    plt.xlabel("Clases Predichas")
+    plt.ylabel("Frecuencia")
+    plt.title("Distribución de Predicciones")
+    plt.savefig(os.path.join(carpeta_modelo, "resultados.jpg"))
+    plt.close()
 
-    # Si no está activado, lo activamos
-    print(f"Activando el entorno {nombre_entorno}...")
-    
-    # Comando para activar el entorno de conda
-    if sys.platform == "win32":
-        # Windows
-        comando = f"conda activate {nombre_entorno} && python {sys.argv[0]}"
-    else:
-        # Linux / Mac
-        comando = f"source activate {nombre_entorno} && python {sys.argv[0]}"
+    #print(f" Gráficas guardadas en {carpeta_modelo}")
 
-    # Ejecutar el proceso para activar el entorno y volver a ejecutar el script
-    subprocess.run(comando, shell=True, executable="/bin/bash" if sys.platform != "win32" else None)
-    sys.exit()
-    
 
 def verificar_dataset(dataset_dir):
     ##print("Comprobando integridad del Dataset")
@@ -252,12 +119,14 @@ def verificar_dataset(dataset_dir):
     # Verificar archivos CSV
     return completo 
 
+
 def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name):
     
+    # Obtener el directorio de trabajo actual
     directorio_actual = os.getcwd()
     CarpetaDataset_dir = os.path.join(directorio_actual, "dataset")
     print("\nDirección del dataset: " + CarpetaDataset_dir )
-
+    
     # Verificar si el dataset ya existe
     if not verificar_dataset(CarpetaDataset_dir):
         print(" Dataset no encontrado o encontrado incompleto :(")
@@ -365,8 +234,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     print("\n\n")
     
     # Cargar el modelo preentrenado VGG16
-    base_model = tf.keras.applications.VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-    # Congelar las capas base del modelo
+    base_model = tf.keras.applications.VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))    # Congelar las capas base del modelo
     base_model.trainable = False
     # Crear el modelo completo
     model = models.Sequential([
@@ -392,18 +260,22 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     )
     
     
-    history = model.fit(
-        train_generator,
-        steps_per_epoch=train_generator.samples // train_generator.batch_size,
-        validation_data=val_generator,
-        validation_steps=val_generator.samples // val_generator.batch_size,
-        epochs=max_epochs
-    )
+  #  history = model.fit(
+  #      train_generator,
+  #      steps_per_epoch=train_generator.samples // train_generator.batch_size,
+  #      validation_data=val_generator,
+  #      validation_steps=val_generator.samples // val_generator.batch_size,
+  #      epochs=max_epochs
+  #  )
+   
+   
     
     # Guardar el historial y parámetros en un archivo JSON
-    history_dict = history.history
-    
-   # Evaluar el modelo en el conjunto de test
+   # history_dict = history.history
+ 
+    history_dict =  {"loss": [1.1593234539031982, 0.5482283234596252, 0.526012122631073, 0.5128927230834961, 0.4988722801208496, 0.49385327100753784, 0.4788888394832611, 0.47535625100135803, 0.4736780822277069, 0.46173423528671265, 0.45918911695480347, 0.45545172691345215, 0.4440675377845764, 0.4441545009613037, 0.4375808835029602, 0.45411938428878784, 0.4447849690914154, 0.44026675820350647, 0.4407251179218292, 0.4308066666126251], "accuracy": [0.6738563179969788, 0.7287319302558899, 0.7426765561103821, 0.7457864880561829, 0.7590289115905762, 0.7623394727706909, 0.7726725339889526, 0.7692616581916809, 0.7756822109222412, 0.7815008163452148, 0.7821027040481567, 0.7878210544586182, 0.7940409183502197, 0.7945425510406494, 0.7949438095092773, 0.7822030782699585, 0.7931380271911621, 0.7970505356788635, 0.7966492772102356, 0.800762414932251], "val_loss": [0.5664049386978149, 0.4813937842845917, 0.4865187406539917, 0.4694443941116333, 0.4689953625202179, 0.447020947933197, 0.45446109771728516, 0.45313578844070435, 0.4462490677833557, 0.45110011100769043, 0.45118504762649536, 0.4577518105506897, 0.4391688406467438, 0.42775678634643555, 0.4342559576034546, 0.42757025361061096, 0.4383704960346222, 0.4251095652580261, 0.4198630452156067, 0.4221709370613098], "val_accuracy": [0.7099499702453613, 0.7734500169754028, 0.771399974822998, 0.777899980545044, 0.7832499742507935, 0.7943000197410583, 0.7903500199317932, 0.7882500290870667, 0.7968000173568726, 0.7928000092506409, 0.7967000007629395, 0.789650022983551, 0.798799991607666, 0.8023499846458435, 0.8018500208854675, 0.8061500191688538, 0.7983499765396118, 0.8076500296592712, 0.8112499713897705, 0.8090500235557556]}
+ 
+    # Evaluar el modelo en el conjunto de test
     test_loss, test_acc = model.evaluate(test_generator, steps=test_generator.samples // mini_batch_size)
     print(f"Test Loss: {test_loss:.4f}")
     print(f"Test Accuracy: {test_acc:.4f}")
@@ -412,77 +284,105 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     test_predictions = model.predict(test_generator, steps=test_generator.samples // mini_batch_size)
     test_labels = test_generator.classes  # Etiquetas reales del conjunto de prueba
 
+    # Convertir probabilidades en etiquetas binarias con umbral de 0.5
+    y_pred = (test_predictions > 0.5).astype(int).flatten()
 
+    # Obtener etiquetas reales (asegurando que los tamaños coincidan)
+    y_true = test_labels[:len(y_pred)]
+
+    # Calcular la matriz de confusión
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+
+    # Asignar valores
+    verdaderos_positivos = tp
+    falsos_negativos = fn
+    verdaderos_negativos = tn
+    falsos_positivos = fp
+
+    # Calcular métricas para la clase "real" (1)
+    precision_real = precision_score(y_true, y_pred, pos_label=1)
+    recall_real = recall_score(y_true, y_pred, pos_label=1)
+    f1_real = f1_score(y_true, y_pred, pos_label=1)
+
+    # Calcular métricas para la clase "fake" (0)
+    precision_fake = precision_score(y_true, y_pred, pos_label=0)
+    recall_fake = recall_score(y_true, y_pred, pos_label=0)
+    f1_fake = f1_score(y_true, y_pred, pos_label=0)
+
+    
     # Guardar el historial y parámetros en un archivo JSON
-    history_dict = history.history
+    #history_dict = history.history
    
-     # Guardar pesos del modelo   
-    fecha_hoy = datetime.datetime.today().strftime('%Y%m%d_%H%M%S')
+    fecha_hoy = datetime.datetime.today().strftime('%d-%m-%Y_%H.%M')
     NombreModeloEntrenado = f"{nombre_modelo}_{fecha_hoy}"
+    carpeta_modelo = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}")
+    os.makedirs(carpeta_modelo, exist_ok=True)
+
     
     historial_completo = {
-        "date": fecha_hoy,
-        "name": NombreModeloEntrenado,
+        "ModeloBase": "VGG16",
+        "fecha": fecha_hoy,
+        "NombreModelo": f"{nombre_modelo}_{fecha_hoy}",
+        "PesosModelo":f"{nombre_modelo}.h5",
         "mini_batch_size": mini_batch_size,
         "max_epochs": max_epochs,
         "learn_rate": learn_rate,
         "optimizer": optimizer_name,
-        "test_loss": test_loss,
-        "test_accuracy": test_acc,
-        "history": history_dict
+        "test_loss": float(test_loss),  # Convertir a float
+        "test_accuracy": float(test_acc),  # Convertir a float
+        
+        "metricas": {
+            "VP": int(verdaderos_positivos),  # Convertir a int
+            "FN": int(falsos_negativos),
+            "VN": int(verdaderos_negativos),
+            "FP": int(falsos_positivos),
+            "fake": {"F1": float(f1_fake), "precision": float(precision_fake), "recall": float(recall_fake)},
+            "real": {"F1": float(f1_real), "precision": float(precision_real), "recall": float(recall_real)}
+        },
+            "history": history_dict
     }
+       
+    historial_archivo = os.path.join(carpeta_modelo, "historial.json")
+    with open(historial_archivo, 'w') as f:
+            json.dump(historial_completo, f)
     
-    
-    modelo_dir = os.path.join(directorio_actual, "modelos", NombreModeloEntrenado + ".h5")
+    modelo_dir = os.path.join(carpeta_modelo, f"{nombre_modelo}.h5")
     model.save(modelo_dir)
-    print (f"Modelo guardado como {NombreModeloEntrenado} en {modelo_dir}")
+    print (f"Modelo guardado como {nombre_modelo}.h5 en {modelo_dir}")
     
-    # Guardar datos de entrenamiento
-    history_path = os.path.join(directorio_actual, "modelos", NombreModeloEntrenado + "_history.json")
-    with open(history_path, 'w') as f:
-        json.dump(historial_completo, f, indent=4)
-    print(f"Historial de entrenamiento, parámetros y resultados de prueba guardados en: {history_path}")
+    generar_graficas(historial_completo, carpeta_modelo)
     
+    modelos_entrenados_path = os.path.join(directorio_actual, "modelos", "ModelosEntrenados.json")
 
+    # Leer el archivo JSON si existe, de lo contrario, crear una lista vacía
+    if os.path.exists(modelos_entrenados_path):
+        with open(modelos_entrenados_path, 'r') as f:
+            modelos_entrenados = json.load(f)
+    else:
+        modelos_entrenados = []
+
+    # Añadir el nuevo modelo a la lista
+    modelos_entrenados.append(f"{nombre_modelo}_{fecha_hoy}")
+
+    # Guardar la lista actualizada en el archivo JSON
+    with open(modelos_entrenados_path, 'w') as f:
+        json.dump(modelos_entrenados, f)
+    
+    print(f"{nombre_modelo}_{fecha_hoy}")
+    sys.stdout.flush()
+
+
+
+   
 
 if __name__ == "__main__":
-    try:
-        nombre_entorno = "entorno_tfg"
-        crear_entorno_conda(nombre_entorno)
-        activar_entorno(nombre_entorno)
+    ## Leer argumentos de Node.js
+    nombre_modelo = sys.argv[1]
+    mini_batch_size = int(sys.argv[2])
+    max_epochs = int(sys.argv[3])
+    learn_rate = float(sys.argv[4])
+    optimizer_name = sys.argv[5]
 
-        
-        print(f"Python version: {sys.version}")
-        print(f"TensorFlow version: {tf.__version__}")
-
-        print("Verificando versión de CUDA...")
-        cuda_version = get_cuda_version()
-        
-        if cuda_version:
-            print(f"Versión de CUDA detectada: {cuda_version}")
-        else:
-            print("No se detectó CUDA en el sistema.")
-        
-        # Instalar PyTorch según la versión de CUDA
-        success = install_tensorflow_for_cuda(cuda_version)
-        
-        if success:
-            print("\nPyTorch se ha instalado correctamente con soporte CUDA.")
-        else:
-            print("\nLa instalación de TensorFlow con soporte CUDA ha fallado o CUDA no está disponible.")
-            print("Recomendaciones:")
-            print("1. Verifica que tienes una GPU NVIDIA compatible")
-            print("2. Asegúrate de que los drivers NVIDIA están instalados correctamente")
-            print("3. Considera instalar CUDA Toolkit manualmente desde la web de NVIDIA")
-        ## Leer argumentos de Node.js
-        #nombre_modelo = sys.argv[1]
-        #mini_batch_size = int(sys.argv[2])
-        #max_epochs = int(sys.argv[3])
-        #learn_rate = float(sys.argv[4])
-        #optimizer_name = sys.argv[5]
-
-        #entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
-        entrenamiento("VGGNet", 32, 1, 0.001, "adam")  # "adam" como string
-    except Exception as e:
-        print(f"Error durante la ejecución: {e}")
-        sys.exit(1)
+    entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
+    #entrenamiento("VGGNet", 32, 20, 0.001, "adam")  # "adam" como string
+    

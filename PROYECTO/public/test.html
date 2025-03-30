@@ -23,23 +23,25 @@
             <li><a href="./train.html">Entrenamiento</a></li>
             <li><a href="./test.html" class="active">Test</a></li>
         </ul>
-        <h1 class="titulo-seccion">Test</h1>
-        <h2 class="subtitulo">Selecciona el modelo</h2>
-        <section id="model-selection">
-            <div>
-                <select id="modelos-guardados" onchange="cambiarModelo()"></select>
-            </div>
-        </section>
-        <h2 class="subtitulo">Selecciona una imagen</h2>
-        <section id="image-selection">
-            <p><label for="fileInput">Selecciona una imagen para determinar si es real o generada por I.A.:</label></p>
-            <br>
-            <p><input type="file" id="fileInput" accept="image/*" multiple /></p>
-        </section>
-        <section id="test-start">
-            <button id="showImageButton" class="custom-btn btn" onclick="clasificarImagen()">Clasificar</button>
-        </section>
-        <div id="imageContainer"></div>
+        <main>
+            <h1 class="titulo-seccion">Test</h1>
+            <h2 class="subtitulo">Selecciona el modelo</h2>
+            <section id="model-selection">
+                <div>
+                    <select id="modelos-guardados" onchange="cambiarModelo()"></select>
+                </div>
+            </section>
+            <h2 class="subtitulo">Selecciona una imagen</h2>
+            <section id="image-selection">
+                <p><label for="fileInput">Selecciona una imagen para determinar si es real o generada por I.A.:</label></p>
+                <br>
+                <p><input type="file" id="fileInput" accept="image/*" multiple /></p>
+            </section>
+            <section id="test-start">
+                <button id="showImageButton" class="custom-btn btn" onclick="clasificarImagen()">Clasificar</button>
+            </section>
+            <div id="imageContainer"></div>
+        </main>
     </article>
     <script src="javascript/index.js"></script>
     <script src="app.js"></script>

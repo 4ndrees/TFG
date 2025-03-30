@@ -25,63 +25,65 @@
             <li><a href="./train.html">Entrenamiento</a></li>
             <li><a href="./test.html">Test</a></li>
         </ul>
-        <h1 class="titulo-seccion">Métricas</h1>
-        <h2 class="subtitulo">Información del modelo</h2>
-        <section id="informacion-modelo">
-            <div>
-                <select id="modelos-guardados" onchange="cambiarModelo()"></select>
-            </div>
-        </section>
-        <section id="info-modelo">
-            <div class="info">
-                <div class="columna-info">
-                    <p>Modelo: <span id="modelo"></span></p>
-                    <p>Fecha de entrenamiento: <span id="fecha_hora"></span></p>
-                    <p>Epochs: <span id="epochs"></span></p>
+        <main>
+            <h1 class="titulo-seccion">Métricas</h1>
+            <h2 class="subtitulo">Información del modelo</h2>
+            <section id="informacion-modelo">
+                <div>
+                    <select id="modelos-guardados" onchange="cambiarModelo()"></select>
                 </div>
-                <div class="columna-info">
-                    <p>Optimizador: <span id="optimizer"></span></p>
-                    <p>Minibatch Size: <span id="mini_batch_size"></span></p>
-                    <p>Tasa de aprendizaje: <span id="learn_rate"></span></p>
+            </section>
+            <section id="info-modelo">
+                <div class="info">
+                    <div class="columna-info">
+                        <p>Modelo: <span id="modelo"></span></p>
+                        <p>Fecha de entrenamiento: <span id="fecha_hora"></span></p>
+                        <p>Epochs: <span id="epochs"></span></p>
+                    </div>
+                    <div class="columna-info">
+                        <p>Optimizador: <span id="optimizer"></span></p>
+                        <p>Minibatch Size: <span id="mini_batch_size"></span></p>
+                        <p>Tasa de aprendizaje: <span id="learn_rate"></span></p>
+                    </div>
                 </div>
-            </div>
-            
-            </div>
-        </section>
-        <h2 class="subtitulo">Métricas generales</h2>
-        <section id="metricas-generales">
-            <h3>Resultados en entrenamiento</h3>
-            <div class="metricas">
-                <div class="metricas-elem" id="metricas-elem">
-                    <img src="images/resultados.png" id="resultados">
+                
                 </div>
-            </div>
-            <h3>Resultados en test</h3>
-            <div class="metricas">
-                <div class="metricas-elem">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Precisión</th>
-                                <th>Recall</th>
-                                <th>F1-score</th>
-                            </tr>
-                        </thead>
-                            <tbody id="metricas-body">
-                        </tbody>
-                    </table>
+            </section>
+            <h2 class="subtitulo">Métricas generales</h2>
+            <section id="metricas-generales">
+                <h3>Resultados en entrenamiento</h3>
+                <div class="metricas">
+                    <div class="metricas-elem" id="metricas-elem">
+                        <img src="images/resultados.png" id="resultados">
+                    </div>
                 </div>
-                <div class="metricas-elem">
-                    <img src="images/confusionMarix.png" id="resultados-test">
+                <h3>Resultados en test</h3>
+                <div class="metricas">
+                    <div class="metricas-elem">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Precisión</th>
+                                    <th>Recall</th>
+                                    <th>F1-score</th>
+                                </tr>
+                            </thead>
+                                <tbody id="metricas-body">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="metricas-elem">
+                        <img src="images/confusionMarix.png" id="resultados-test">
+                    </div>
                 </div>
-            </div>
-        </sectinon>
-        <section id="return">
-            <div class="return-elem">
-                <a href="./index.html"><button class="custom-btn btn">Volver a inicio</button></a>
-            </div>
-        </section>
+            </sectinon>
+            <section id="return">
+                <div class="return-elem">
+                    <a href="./index.html"><button class="custom-btn btn">Volver a inicio</button></a>
+                </div>
+            </section>
+        </main>
     </article>
     <script>
         document.addEventListener("DOMContentLoaded", () => {

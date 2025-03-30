@@ -29,7 +29,7 @@ p{
 }
 
 ul{
-    width: 1200px;
+    width: 100%;
     background-color: rgba(191, 179, 168, 1);
     list-style-type: none;
     margin: 0;
@@ -39,9 +39,9 @@ ul{
     justify-content: center; 
     flex-wrap: wrap; 
 
-    position: fixed;
-    top: 25px;
-    left: 175px;
+    position: sticky;
+    top: 0;
+    left: 0;
 }
 
 ul li{
@@ -161,13 +161,15 @@ h3{
     height: 700px;
     width: 1200px;
     margin: 25px 175px;
-    padding-top: 50px;
-    padding-left: 50px;
     min-width: 200px;
     overflow-y: auto;
     overflow-x: hidden; 
     scrollbar-width: none;
     box-sizing: border-box;
+}
+
+main {
+    padding-left: 50px;
 }
 
 #pantalla-index{

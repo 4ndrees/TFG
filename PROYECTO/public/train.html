@@ -23,60 +23,62 @@
             <li><a href="./train.html" class="active">Entrenamiento</a></li>
             <li><a href="./test.html">Test</a></li>
         </ul>
-        <h1 class="titulo-seccion">Entrenamiento</h1>
-        <section id="modelos-disponibles">
-            <div class="model-btn">
-                <p>AlexNet</p>
-                <a class="documentation-link" href="">Documentación</a>
-            </div>
-            <div class="model-btn">
-                <p>ResNet50</p>
-                <a class="documentation-link" href="">Documentación</a>
-            </div>
-            <div class="model-btn">
-                <p>VGGNet</p>
-                <a class="documentation-link" href="">Documentación</a>
-            </div>
-            <script>
-                // Selecciona todos los elementos con la clase 'model-btn'
-                const buttons = document.querySelectorAll('.model-btn');
+        <main>
+            <h1 class="titulo-seccion">Entrenamiento</h1>
+            <section id="modelos-disponibles">
+                <div class="model-btn">
+                    <p>AlexNet</p>
+                    <a class="documentation-link" href="">Documentación</a>
+                </div>
+                <div class="model-btn">
+                    <p>ResNet50</p>
+                    <a class="documentation-link" href="">Documentación</a>
+                </div>
+                <div class="model-btn">
+                    <p>VGGNet</p>
+                    <a class="documentation-link" href="">Documentación</a>
+                </div>
+                <script>
+                    // Selecciona todos los elementos con la clase 'model-btn'
+                    const buttons = document.querySelectorAll('.model-btn');
 
-                buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Elimina la clase 'active' de todos los botones
-                    buttons.forEach(btn => btn.classList.remove('model-btn-active'));
+                    buttons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        // Elimina la clase 'active' de todos los botones
+                        buttons.forEach(btn => btn.classList.remove('model-btn-active'));
 
-                    // Añade la clase 'active' al botón clicado
-                    button.classList.add('model-btn-active');
+                        // Añade la clase 'active' al botón clicado
+                        button.classList.add('model-btn-active');
+                        });
                     });
-                });
-            </script>
-        </section>
-        <h2 class="subtitulo">Parámetros del Entrenamiento</h2>
-        <section id="parametros-entrenamiento">
-            <div>
-                <h3>Tamaño del mini-lote</h3>
-                <textarea name="" id="minibatch"></textarea>
-            </div>
-            <div>
-                <h3>Max. epochs</h3>
-                <textarea name="" id="epochs"></textarea>
-            </div>
-            <div id="optimizador">
-                <h3>Optimizador</h3>
-                <select id="optimizadores">
-                    <option>Adam</option>
-                    <option>SGD</option>
-                </select>
-            </div>
-            <div>
-                <h3>Tasa de aprendizaje</h3>
-                <textarea name="" id="learningR"></textarea>
-            </div>
-        </section>
-        <section id="train-start">
-            <button class="custom-btn btn" onclick="entrenarModelo()">Entrenar</button>
-        </section>
+                </script>
+            </section>
+            <h2 class="subtitulo">Parámetros del Entrenamiento</h2>
+            <section id="parametros-entrenamiento">
+                <div>
+                    <h3>Tamaño del mini-lote</h3>
+                    <textarea name="" id="minibatch"></textarea>
+                </div>
+                <div>
+                    <h3>Max. epochs</h3>
+                    <textarea name="" id="epochs"></textarea>
+                </div>
+                <div id="optimizador">
+                    <h3>Optimizador</h3>
+                    <select id="optimizadores">
+                        <option>Adam</option>
+                        <option>SGD</option>
+                    </select>
+                </div>
+                <div>
+                    <h3>Tasa de aprendizaje</h3>
+                    <textarea name="" id="learningR"></textarea>
+                </div>
+            </section>
+            <section id="train-start">
+                <button class="custom-btn btn" onclick="entrenarModelo()">Entrenar</button>
+            </section>
+        </main>
     </article>
 
     <script src="javascript/index.js"></script>

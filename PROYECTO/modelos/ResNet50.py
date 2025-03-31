@@ -320,7 +320,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         "ModeloBase": "ResNet",
         "fecha": fecha_hoy,
         "NombreModelo": f"{nombre_modelo}_{fecha_hoy}",
-        "PesosModelo":f"{nombre_modelo}.pth",
+        "PesosModelo":f"{nombre_modelo}.h5",
         "mini_batch_size": mini_batch_size,
         "max_epochs": max_epochs,
         "learn_rate": learn_rate,

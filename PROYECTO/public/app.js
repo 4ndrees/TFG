@@ -77,12 +77,11 @@ async function clasificarImagen() {
                 // exito
                 const data = await response.json();
                 if (data && data.predictedClass !== undefined) {
-                    mostrarImagen(file, result.predictedClass);
+                    mostrarImagen(file, data.predictedClass);
                 } else {
                     alert('No se pudo obtener la clase predicha.');
                 }
             }
-            mostrarImagen(file, "result.predictedClass"); //PRUEBA
         } catch (error) {
             console.error(error);
             alert('Hubo un problema al clasificar la imagen. Inténtalo de nuevo.');

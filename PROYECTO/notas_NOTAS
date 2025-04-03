@@ -19,6 +19,8 @@ el ordenador en el que se lance
 se necesita instalar pip install tqdm
 tb pip install torch torchvision torchaudio
 
+se necesita tb instalar tensorflow
+
 cfreo que podemos utilizar esto
 try:
     import torch

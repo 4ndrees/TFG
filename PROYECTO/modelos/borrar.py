@@ -11,7 +11,7 @@ estructura_correcta = {
 def verificar_estructura(dataset_dir, estructura_correcta):
     """Verifica que la estructura del dataset sea correcta."""
     if not os.path.exists(dataset_dir):
-        print(f"❌ Falta la carpeta principal del dataset: {dataset_dir}")
+        print(f" Falta la carpeta principal del dataset: {dataset_dir}")
         return False
 
     completo = True
@@ -20,13 +20,13 @@ def verificar_estructura(dataset_dir, estructura_correcta):
         path_carpeta = os.path.join(dataset_dir, carpeta_principal)
 
         if not os.path.exists(path_carpeta):
-            print(f"⚠️  Falta la carpeta: {path_carpeta}")
+            print(f"  Falta la carpeta: {path_carpeta}")
             completo = False
 
         for subcarpeta in subcarpetas:
             path_subcarpeta = os.path.join(path_carpeta, subcarpeta)
             if not os.path.exists(path_subcarpeta):
-                print(f"⚠️  Falta la subcarpeta: {path_subcarpeta}")
+                print(f"  Falta la subcarpeta: {path_subcarpeta}")
                 completo = False
 
     return completo
@@ -35,12 +35,12 @@ def verificar_estructura(dataset_dir, estructura_correcta):
 def borrar_mitad_archivos(ruta_subcarpeta):
     """Elimina la mitad de los archivos en una carpeta."""
     if not os.path.exists(ruta_subcarpeta):
-        print(f"❌ La carpeta {ruta_subcarpeta} no existe, saltando...")
+        print(f" La carpeta {ruta_subcarpeta} no existe, saltando...")
         return
 
     archivos = os.listdir(ruta_subcarpeta)
     if not archivos:
-        print(f"⚠️  La carpeta {ruta_subcarpeta} está vacía, nada que borrar.")
+        print(f"  La carpeta {ruta_subcarpeta} está vacía, nada que borrar.")
         return
 
     archivos_completos = [os.path.join(ruta_subcarpeta, archivo) for archivo in archivos]
@@ -48,9 +48,9 @@ def borrar_mitad_archivos(ruta_subcarpeta):
 
     for archivo in archivos_a_borrar:
         os.remove(archivo)
-        print(f"🗑️  Eliminado: {archivo}")
+        print(f"  Eliminado: {archivo}")
 
-    print(f"✅ Se eliminaron {len(archivos_a_borrar)} archivos en {ruta_subcarpeta}")
+    print(f" Se eliminaron {len(archivos_a_borrar)} archivos en {ruta_subcarpeta}")
 
 
 def main():
@@ -63,7 +63,7 @@ def main():
     # Convertir la ruta en una absoluta y normalizada
     dataset_dir = os.path.abspath(dataset_dir)
     if not verificar_estructura(dataset_dir, estructura_correcta):
-        print("❌ La estructura del dataset no es correcta. Revisa los errores arriba.")
+        print(" La estructura del dataset no es correcta. Revisa los errores arriba.")
         return
 
     # Recorrer la estructura y aplicar la eliminación

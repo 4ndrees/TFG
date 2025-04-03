@@ -6,9 +6,8 @@
 
 body{
     /*background-image: url('../images/background.png');*/
-    background-color: #7c1212;
+    background-color: #3b0404;
     background-size: cover;
-    font-family: Helvetica, sans-serif;
     font-weight: bold;
     overflow: hidden;
     display: flex;
@@ -85,7 +84,7 @@ button{
 }
 
 .btn {
-    background: rgb(115, 36, 36);
+    background: #670b0b;
     border: none;
     z-index: 1;
 }
@@ -117,7 +116,7 @@ top: 2px;
 }
 
 .titulo{
-    color: #A6374B;
+    color: #680707;
     font-size: 40px;
     font-weight: normal;
     margin: 20px 0px

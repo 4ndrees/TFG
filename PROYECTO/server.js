@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const tf = require('@tensorflow/tfjs');
 const { spawn } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -114,34 +115,23 @@ app.post('/entrenar', async (req, res) => {
             imagePath: imagePath,
         });
 
-        let proceso = spawn('python', [path.join(__dirname, 'modelos', `clasificar.py`), nombreModelo, imagePath]);
-        
-        let stdoutData = '';
-        let stderrData = '';
+        const proceso = spawnSync('python', [path.join(__dirname, 'modelos', 'clasificar.py'), nombreModelo, imagePath], { encoding: 'utf-8' });
 
-        proceso.stdout.on('data', (data) => {
-            stdoutData += data.toString();
-        });
+        const stdoutData = proceso.stdout;
+        const stderrData = proceso.stderr;
 
-        proceso.stderr.on('data', (data) => {
-            stderrData += data.toString();
-            console.error(`Error/Warning en clasificar.py: ${data.toString()}`);
-        });
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
 
-        proceso.on('close', (code) => {
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath);
-            }
+        if (proceso.status !== 0) {
+            return res.status(500).json({ error: 'Error en la clasificación', details: stderrData });
+        }
 
-            if (code !== 0) {
-                return res.status(500).json({ error: 'Error en la clasificación', details: stderrData });
-            }
-
-            const lineas = stdoutData.trim().split("\n");
-            const predictedClass = lineas[lineas.length - 1] || "ClaseNoDefinida";
-
-            return res.json({ predictedClass });
-        });
+        const lineas = stdoutData.trim().split("\n");
+        const predictedClass = lineas[lineas.length - 1] || "ClaseNoDefinida";
+        console.log("Clase predicha:", predictedClass);
+        return res.json({ predictedClass });
 
     } catch (error) {
         console.error("Error al clasificar la imagen:", error);

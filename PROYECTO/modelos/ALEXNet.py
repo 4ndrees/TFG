@@ -39,7 +39,9 @@ import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 from torchvision import models
 from torchvision.models import AlexNet_Weights
+import matplotlib.pyplot as plt
 from kaggle.api.kaggle_api_extended import KaggleApi
+
 
 def crear_entorno_conda(nombre_entorno, version_python="3.9"):
     # Verificar si el entorno existe
@@ -264,7 +266,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     #prueba para la GPU el batch size es la cantidad de imagenes q procesa la GPU a la vez, con 1 no funciona bien
     #el num workers es un proceso separado q preprocesa y carga los datos antes de enviarlo a la GPU
     #ESTO HAY QUE CAMBIARLO ANTES DE HACER PRUEBAS
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=8, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=mini_batch_size, shuffle=True, num_workers=8, pin_memory=True)
     #train_loader = DataLoader(train_dataset, batch_size=mini_batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=mini_batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=mini_batch_size, shuffle=False)
@@ -279,7 +281,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     criterion = nn.BCEWithLogitsLoss()
     
     optimizer = optim.Adam(model.parameters(), lr=learn_rate) if optimizer_name.lower() == 'adam' else optim.SGD(model.parameters(), lr=learn_rate, momentum=0.9)
-    
+
     historial_perdida = []
     historial_accuracy = []
     historial_val_accuracy = []
@@ -314,11 +316,10 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
                 predictions = (torch.sigmoid(outputs) > 0.5).float()
                 correct_train += (predictions == labels).sum().item()
                 total_train += labels.size(0)
-                
+                running_loss += loss.item()
                 # Actualizar la barra de progreso con la pérdida actual
                 #pbar.set_postfix(loss=running_loss / (len(train_loader) + 1), accuracy=correct_train / total_train)
 
-        #print(f"3")
         # Calcular accuracy de entrenamiento
         train_accuracy = correct_train / total_train
         avg_loss = running_loss / len(train_loader)

@@ -277,18 +277,19 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     print(f"Test Loss: {test_loss:.4f}")
     print(f"Test Accuracy: {test_acc:.4f}")
     
-    # Obtener predicciones del conjunto de prueba
-    test_predictions = model.predict(test_generator, steps=test_generator.samples // mini_batch_size)
-    test_labels = test_generator.classes  # Etiquetas reales del conjunto de prueba
+    # --- PREDECIR TODAS LAS MUESTRAS ---
+    steps = int(np.ceil(test_generator.samples / test_generator.batch_size))
+    predicciones = model.predict(test_generator, steps=steps).flatten()
 
-    # Convertir probabilidades en etiquetas binarias con umbral de 0.5
-    y_pred = (test_predictions > 0.5).astype(int).flatten()
+    # --- CONVERTIR A CLASES BINARIAS ---
+    y_pred = (predicciones > 0.5).astype(int)
 
-    # Obtener etiquetas reales (asegurando que los tamaños coincidan)
-    y_true = test_labels[:len(y_pred)]
+    # --- ETIQUETAS REALES ---
+    y_real = test_generator.classes[:len(y_pred)]
+
 
     # Calcular la matriz de confusión
-    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    tn, fp, fn, tp = confusion_matrix(y_real, y_pred).ravel()
 
     # Asignar valores
     verdaderos_positivos = tp
@@ -307,8 +308,6 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     f1_fake = f1_score(y_true, y_pred, pos_label=0)
 
     
-    # Guardar el historial y parámetros en un archivo JSON
-    #history_dict = history.history
    
     fecha_hoy = datetime.datetime.today().strftime('%d-%m-%Y_%H.%M')
     NombreModeloEntrenado = f"{nombre_modelo}_{fecha_hoy}"

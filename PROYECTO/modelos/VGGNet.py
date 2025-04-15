@@ -10,6 +10,9 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.optimizers import Adam, SGD
 import tensorflow as tf
+print(tf.__version__)
+print(tf.test.is_built_with_cuda())
+print(tf.test.is_built_with_gpu_support())
 from tensorflow.keras import layers, models
 import numpy as np
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, roc_curve, auc
@@ -274,26 +277,24 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     # Guardar el historial y parámetros en un archivo JSON
     history_dict = history.history
- 
-    history_dict =  {"loss": [1.1593234539031982, 0.5482283234596252, 0.526012122631073, 0.5128927230834961, 0.4988722801208496, 0.49385327100753784, 0.4788888394832611, 0.47535625100135803, 0.4736780822277069, 0.46173423528671265, 0.45918911695480347, 0.45545172691345215, 0.4440675377845764, 0.4441545009613037, 0.4375808835029602, 0.45411938428878784, 0.4447849690914154, 0.44026675820350647, 0.4407251179218292, 0.4308066666126251], "accuracy": [0.6738563179969788, 0.7287319302558899, 0.7426765561103821, 0.7457864880561829, 0.7590289115905762, 0.7623394727706909, 0.7726725339889526, 0.7692616581916809, 0.7756822109222412, 0.7815008163452148, 0.7821027040481567, 0.7878210544586182, 0.7940409183502197, 0.7945425510406494, 0.7949438095092773, 0.7822030782699585, 0.7931380271911621, 0.7970505356788635, 0.7966492772102356, 0.800762414932251], "val_loss": [0.5664049386978149, 0.4813937842845917, 0.4865187406539917, 0.4694443941116333, 0.4689953625202179, 0.447020947933197, 0.45446109771728516, 0.45313578844070435, 0.4462490677833557, 0.45110011100769043, 0.45118504762649536, 0.4577518105506897, 0.4391688406467438, 0.42775678634643555, 0.4342559576034546, 0.42757025361061096, 0.4383704960346222, 0.4251095652580261, 0.4198630452156067, 0.4221709370613098], "val_accuracy": [0.7099499702453613, 0.7734500169754028, 0.771399974822998, 0.777899980545044, 0.7832499742507935, 0.7943000197410583, 0.7903500199317932, 0.7882500290870667, 0.7968000173568726, 0.7928000092506409, 0.7967000007629395, 0.789650022983551, 0.798799991607666, 0.8023499846458435, 0.8018500208854675, 0.8061500191688538, 0.7983499765396118, 0.8076500296592712, 0.8112499713897705, 0.8090500235557556]}
- 
+  
     # Evaluar el modelo en el conjunto de test
     test_loss, test_acc = model.evaluate(test_generator, steps=test_generator.samples // mini_batch_size)
     print(f"Test Loss: {test_loss:.4f}")
     print(f"Test Accuracy: {test_acc:.4f}")
     
-    # Obtener predicciones del conjunto de prueba
-    test_predictions = model.predict(test_generator, steps=test_generator.samples // mini_batch_size)
-    test_labels = test_generator.classes  # Etiquetas reales del conjunto de prueba
+    # --- PREDECIR TODAS LAS MUESTRAS ---
+    steps = int(np.ceil(test_generator.samples / test_generator.batch_size))
+    predicciones = model.predict(test_generator, steps=steps).flatten()
 
-    # Convertir probabilidades en etiquetas binarias con umbral de 0.5
-    y_pred = (test_predictions > 0.5).astype(int).flatten()
+    # --- CONVERTIR A CLASES BINARIAS ---
+    y_pred = (predicciones > 0.5).astype(int)
 
-    # Obtener etiquetas reales (asegurando que los tamaños coincidan)
-    y_true = test_labels[:len(y_pred)]
+    # --- ETIQUETAS REALES ---
+    y_real = test_generator.classes[:len(y_pred)]
 
     # Calcular la matriz de confusión
-    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    tn, fp, fn, tp = confusion_matrix(y_real, y_pred).ravel()
 
     # Asignar valores
     verdaderos_positivos = tp
@@ -311,9 +312,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     recall_fake = recall_score(y_true, y_pred, pos_label=0)
     f1_fake = f1_score(y_true, y_pred, pos_label=0)
 
-    
-    # Guardar el historial y parámetros en un archivo JSON
-    #history_dict = history.history
+ 
    
     fecha_hoy = datetime.datetime.today().strftime('%d-%m-%Y_%H.%M')
     NombreModeloEntrenado = f"{nombre_modelo}_{fecha_hoy}"
@@ -379,12 +378,12 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
 if __name__ == "__main__":
     ## Leer argumentos de Node.js
-    nombre_modelo = sys.argv[1]
-    mini_batch_size = int(sys.argv[2])
-    max_epochs = int(sys.argv[3])
-    learn_rate = float(sys.argv[4])
-    optimizer_name = sys.argv[5]
+    #nombre_modelo = sys.argv[1]
+    #mini_batch_size = int(sys.argv[2])
+    #max_epochs = int(sys.argv[3])
+    #learn_rate = float(sys.argv[4])
+    #optimizer_name = sys.argv[5]
 
-    entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
-    #entrenamiento("VGGNet", 32, 20, 0.001, "adam")  # "adam" como string
+    #entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
+    entrenamiento("VGGNet", 32, 30, 0.001, "adam")  # "adam" como string
     

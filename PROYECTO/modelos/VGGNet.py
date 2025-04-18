@@ -232,7 +232,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         test_dir,
         target_size=(224, 224),
         batch_size= mini_batch_size,
-        class_mode='binary' #(0: falso, 1: real).
+        class_mode='binary', #(0: falso, 1: real).
+        shuffle=False 
     )
     print("\n\n")
     
@@ -265,6 +266,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     print("GPUs disponibles:", tf.config.list_physical_devices('GPU'))
     tf.debugging.set_log_device_placement(True)
 
+
+    
     history = model.fit(
         train_generator,
         steps_per_epoch=train_generator.samples // train_generator.batch_size,
@@ -277,7 +280,9 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     
     # Guardar el historial y parámetros en un archivo JSON
     history_dict = history.history
-  
+    
+    
+    
     # Evaluar el modelo en el conjunto de test
     test_loss, test_acc = model.evaluate(test_generator, steps=test_generator.samples // mini_batch_size)
     print(f"Test Loss: {test_loss:.4f}")
@@ -295,6 +300,11 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
     # Calcular la matriz de confusión
     tn, fp, fn, tp = confusion_matrix(y_real, y_pred).ravel()
+    print(f"Verdaderos Positivos: {tp}")
+    print(f"Falsos Negativos: {fn}")
+    print(f"Verdaderos Negativos: {tn}")
+    print(f"Falsos Positivos: {fp}")    
+
 
     # Asignar valores
     verdaderos_positivos = tp
@@ -303,17 +313,15 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     falsos_positivos = fp
 
     # Calcular métricas para la clase "real" (1)
-    precision_real = precision_score(y_true, y_pred, pos_label=1)
-    recall_real = recall_score(y_true, y_pred, pos_label=1)
-    f1_real = f1_score(y_true, y_pred, pos_label=1)
+    precision_real = precision_score(y_real, y_pred, pos_label=1)
+    recall_real = recall_score(y_real, y_pred, pos_label=1)
+    f1_real = f1_score(y_real, y_pred, pos_label=1)
 
     # Calcular métricas para la clase "fake" (0)
-    precision_fake = precision_score(y_true, y_pred, pos_label=0)
-    recall_fake = recall_score(y_true, y_pred, pos_label=0)
-    f1_fake = f1_score(y_true, y_pred, pos_label=0)
+    precision_fake = precision_score(y_real, y_pred, pos_label=0)
+    recall_fake = recall_score(y_real, y_pred, pos_label=0)
+    f1_fake = f1_score(y_real, y_pred, pos_label=0)
 
- 
-   
     fecha_hoy = datetime.datetime.today().strftime('%d-%m-%Y_%H.%M')
     NombreModeloEntrenado = f"{nombre_modelo}_{fecha_hoy}"
     carpeta_modelo = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}")

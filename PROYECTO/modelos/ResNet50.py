@@ -229,7 +229,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         test_dir,
         target_size=(224, 224),
         batch_size= mini_batch_size,
-        class_mode='binary' #(0: falso, 1: real).
+        class_mode='binary', #(0: falso, 1: real).
+        shuffle=False 
     )
     print("\n\n")
     
@@ -298,14 +299,14 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     falsos_positivos = fp
 
     # Calcular métricas para la clase "real" (1)
-    precision_real = precision_score(y_true, y_pred, pos_label=1)
-    recall_real = recall_score(y_true, y_pred, pos_label=1)
-    f1_real = f1_score(y_true, y_pred, pos_label=1)
+    precision_real = precision_score(y_real, y_pred, pos_label=1)
+    recall_real = recall_score(y_real, y_pred, pos_label=1)
+    f1_real = f1_score(y_real, y_pred, pos_label=1)
 
     # Calcular métricas para la clase "fake" (0)
-    precision_fake = precision_score(y_true, y_pred, pos_label=0)
-    recall_fake = recall_score(y_true, y_pred, pos_label=0)
-    f1_fake = f1_score(y_true, y_pred, pos_label=0)
+    precision_fake = precision_score(y_real, y_pred, pos_label=0)
+    recall_fake = recall_score(y_real, y_pred, pos_label=0)
+    f1_fake = f1_score(y_real, y_pred, pos_label=0)
 
     
    

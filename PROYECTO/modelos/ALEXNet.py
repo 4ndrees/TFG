@@ -13,23 +13,33 @@ try:
     import numpy as np
     from sklearn.metrics import confusion_matrix, roc_curve, auc
 except ImportError:
-    subprocess.run([sys.executable, "-m", "pip", "install", "matplotlib", "seaborn", "numpy", "scikit-learn"])
+    result = subprocess.run([sys.executable, "-m", "pip", "install", "matplotlib", "seaborn", "numpy", "scikit-learn"])
 
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import numpy as np
-    from sklearn.metrics import confusion_matrix, roc_curve, auc
+    if result.returncode == 0:
+        print("Los módulos se instalaron correctamente.")
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        import numpy as np
+        from sklearn.metrics import confusion_matrix, roc_curve, auc
+    else:
+        print(f"Error al intentar instalar los módulos: {result.stderr}")
+        sys.exit(1)
 
 try:
      import torch
      import tqdm
      import kaggle
 except ImportError:
-     subprocess.run([sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio", "tqdm", "kaggle"])
+    result = subprocess.run([sys.executable, "-m", "pip", "install", "torch", "torchvision", "torchaudio", "tqdm", "kaggle"])
  
-     import torch
-     import tqdm
-     import kaggle
+    if result.returncode == 0:
+        import torch
+        import tqdm
+        import kaggle
+    else:
+        print(f"Error al intentar instalar los módulos: {result.stderr}")
+        sys.exit(1)  # Finaliza el script si la instalación falla
+
 
 from tqdm import tqdm
 import torch.nn as nn
@@ -482,8 +492,8 @@ if __name__ == "__main__":
         optimizer_name = sys.argv[5]
 
         nombre_entorno = "entorno_tfg"
-        crear_entorno_conda(nombre_entorno)
-        activar_entorno(nombre_entorno)
+        ##crear_entorno_conda(nombre_entorno)
+        ##activar_entorno(nombre_entorno)
 
         
         # cuda_version = get_cuda_version()

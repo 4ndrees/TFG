@@ -28,7 +28,7 @@ npm -v
 Si no los tiene, instalelos desde la página oficial de Node.js
 
 ## Python
-Este proyecto usa Python 3.9.x (probado con 3.9.21). Funciona también con versiones superiores. Descárgalo desde la página oficial de Python.
+Este proyecto usa Python 3.9.x (probado con 3.9.21). Funciona también con versiones superiores. Descárguelo desde la página oficial de Python.
 
 ## Kaggle API 
 Para descargar automáticamente el dataset de entrenamiento: 
@@ -61,11 +61,11 @@ npm install
 ```
 Otras librerías también son necesarias para el lanzamiento de la aplicación; estas se instalan automáticamente al iniciarla si es que aún no las tiene.
 # Modelos entrenados
-En el repositorio se encuentra un archivo .zip con modelos ya entrenados. Extrae su contenido en:
+En el repositorio se encuentra un archivo .zip con modelos ya entrenados. Extraiga su contenido en:
 ```bash
 TFG/PROYECTO/Modelo
 ```
-Se crearán subcarpetas por cada modelo
+Se crearán subcarpetas por cada modelo.
 # Ejecutar la aplicación
 ## CPU (por defecto)
 ```bash
@@ -74,16 +74,15 @@ node server.js
 Esto inicia el servidor en http://localhost:3000 y usa la CPU para todo el procesamiento.
 ## GPU (AlexNet)
 Para aprovechar GPU con AlexNet:
-  1. Instala y configura Conda para tu GPU.
+  1. Instale y configure Conda para su GPU.
   2. Al ejecutar, la app creará el entorno y descargará la versión de PyTorch compatible.
 
 Si no hay GPU disponible, la aplicación caerá automáticamente a modo CPU.
 
 # Acceso a la aplicación
-Abre tu navegador en
-```bash
-http://localhost:3000
-```
+Abra su navegador en
+   http://localhost:3000
+
 La aplicación solo estará disponible en el equipo donde corre el servidor.
 
 # Licencia

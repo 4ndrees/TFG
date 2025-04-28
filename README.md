@@ -1,17 +1,27 @@
-1. investigar Alexnet 25/10
-2. buscar dataset kaggle 25/10
+# TFG: Clasificación de Imágenes con Deep Learning
 
-Dataset 70K fotos reales y 70k fotos falsas: https://www.kaggle.com/datasets/xhlulu/140k-real-and-fake-faces
+Este repositorio contiene el código fuente del Trabajo de Fin de Grado (TFG) para la clasificación de imágenes mediante redes neuronales (AlexNet, TensorFlow, PyTorch). Incluye scripts para entrenamiento, modelos ya entrenados y una aplicación web local para probar la clasificación.
+
+- [Descarga del proyecto](#descarga-del-proyecto)  
+- [Requisitos previos](#requisitos-previos)  
+  - [Node.js & npm](#nodejs--npm)  
+  - [Python](#python)  
+  - [Kaggle API](#kaggle-api)  
+  - [Versiones de TensorFlow, NumPy y Scikit-learn](#versiones-de-tensorflow-numpy-y-scikit-learn)  
+- [Instalación](#instalación)  
+  - [Clonar repositorio](#clonar-repositorio)  
+  - [Instalar dependencias Node.js](#instalar-dependencias-nodejs)  
+  - [Instalar dependencias Python](#instalar-dependencias-python)  
+- [Modelos entrenados](#modelos-entrenados)  
+- [Ejecutar la aplicación](#ejecutar-la-aplicación)  
+  - [CPU (por defecto)](#cpu-por-defecto)  
+  - [GPU (AlexNet)](#gpu-alexnet)  
+- [Acceso a la aplicación](#acceso-a-la-aplicación)  
+- [Licencia](#licencia)
 
 
-3. tecnicas de procesado de datos 25/10
-4. Desarrollar modelo beta 29/10
-5. cargar base de datos
-6. entrenar
-7. clasificar
+## Descarga del proyecto
 
-En los .py, para que funcione la API de Kaggle hay que realizar los siguientes pasos:
-1. Ir a Kaggle e iniciar sesión
-2. Ir a settings (pinchando en tu perfil en la esquina superior derecha y settings)
-3. En la sección de API darle a Create New Token que descargará el archivo kaggle.json
-4. Mover este archivo a C:\Users\TU_USUARIO\.kaggle\kaggle.json
+El código fuente está alojado en GitHub. Para clonarlo, abre tu terminal y ejecuta:
+```bash
+git clone https://github.com/4ndrees/TFG.git

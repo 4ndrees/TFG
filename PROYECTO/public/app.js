@@ -130,6 +130,9 @@ async function mostrarMetricas(modeloSeleccionadoNombre){
     const modelo = modeloSeleccionadoNombre.split('_')[0];
     var fecha_hora = modeloSeleccionadoNombre.split('_')[1] + " " + modeloSeleccionadoNombre.split('_')[2];
 
+    const select = document.getElementById("modelos-guardados");
+    select.value = modeloSeleccionadoNombre;
+
     fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/historial.json`)
             .then(response => response.json())
             .then(data => {
@@ -147,6 +150,7 @@ async function mostrarMetricas(modeloSeleccionadoNombre){
                 metricasBody.innerHTML = "";
 
                 for (const clase in data.metricas) {
+                    if(clase == "real" || clase == "fake"){
                     const row = `
                         <tr>
                             <td>${clase}</td>
@@ -156,23 +160,44 @@ async function mostrarMetricas(modeloSeleccionadoNombre){
                         </tr>
                     `;
                     metricasBody.innerHTML += row;
+                    }
                 }
             })
             .catch(error => console.error("Error obteniendo los resultados:", error)); 
 
-    fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/resultados.jpg`)
+    //accuracy y loss
+    fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/train_metrics.jpg`)
             .then(response => response.blob())
             .then(blob => {
                 const imageUrl = URL.createObjectURL(blob);
                 document.getElementById("resultados").src = imageUrl;
             })
             .catch(error => console.error("Error obteniendo la imagen:", error));
-
-    fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/resultados_test.jpg`)
+    
+    //matriz de confusión
+    fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/confusion_matrix.jpg`)
             .then(response => response.blob())
             .then(blob => {
                 const imageUrl = URL.createObjectURL(blob);
                 document.getElementById("resultados-test").src = imageUrl;
+            })
+            .catch(error => console.error("Error obteniendo la imagen:", error));
+
+    //distribucion de predicciones
+    fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/resultados.jpg`)
+            .then(response => response.blob())
+            .then(blob => {
+                const imageUrl = URL.createObjectURL(blob);
+                document.getElementById("predicciones").src = imageUrl;
+            })
+            .catch(error => console.error("Error obteniendo la imagen:", error));
+
+    //curva roc
+    fetch(`http://localhost:3000/modelos/${modeloSeleccionadoNombre}/resultados_test.jpg`)
+            .then(response => response.blob())
+            .then(blob => {
+                const imageUrl = URL.createObjectURL(blob);
+                document.getElementById("curva_roc").src = imageUrl;
             })
             .catch(error => console.error("Error obteniendo la imagen:", error));
 }

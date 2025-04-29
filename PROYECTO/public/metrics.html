@@ -54,7 +54,7 @@
                 <h3>Resultados en entrenamiento</h3>
                 <div class="metricas">
                     <div class="metricas-elem" id="metricas-elem">
-                        <img src="images/resultados.png" id="resultados">
+                        <img id="resultados">
                     </div>
                 </div>
                 <h3>Resultados en test</h3>
@@ -74,7 +74,13 @@
                         </table>
                     </div>
                     <div class="metricas-elem">
-                        <img src="images/confusionMarix.png" id="resultados-test">
+                        <img id="resultados-test">
+                    </div>
+                    <div class="metricas-elem">
+                        <img id="predicciones">
+                    </div>
+                    <div class="metricas-elem">
+                        <img id="curva_roc">
                     </div>
                 </div>
             </sectinon>
@@ -86,12 +92,17 @@
         </main>
     </article>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        window.addEventListener("load", () => {
             const urlParams = new URLSearchParams(window.location.search);
         
-            const modeloSeleccionado = urlParams.get("modelo");
+            let modeloSeleccionado = urlParams.get("modelo");
+            if (!modeloSeleccionado){
+                const select = document.getElementById("modelos-guardados");
+                if (select) {
+                    modeloSeleccionado = select.value;
+                }
+            }
             console.log(modeloSeleccionado);
-
             mostrarMetricas(modeloSeleccionado);
         });
     </script>

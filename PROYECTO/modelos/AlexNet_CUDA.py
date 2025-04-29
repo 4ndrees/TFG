@@ -9,8 +9,6 @@ def crear_entorno_conda(nombre_entorno, version_python="3.9"):
 
     if nombre_entorno not in entorno_existe.stdout:
         print(f"Creando el entorno {nombre_entorno}...")
-        # Si no existe, crearlo
-        print(f"Creando el entorno {nombre_entorno} con Python {version_python}...")
         proceso = subprocess.run(f"conda create --yes --name {nombre_entorno} python={version_python}", shell=True, check=True, text=True)
         
         if proceso.returncode == 0:
@@ -105,7 +103,7 @@ def install_pytorch(cuda_version=None):
         cuda_tag = cuda_mapping[cuda_version]
         torch_index_url = f"https://download.pytorch.org/whl/{cuda_tag}"
     else:
-        print("⚠️ No se encontró un índice específico para esta versión de CUDA. Instalando versión de PyTorch para CPU...")
+        print("No se encontró un índice específico para esta versión de CUDA. Instalando versión de PyTorch para CPU...")
         torch_index_url = None
 
     # Instalar PyTorch

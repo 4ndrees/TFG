@@ -56,22 +56,46 @@
             <h2 class="subtitulo">Parámetros del Entrenamiento</h2>
             <section id="parametros-entrenamiento">
                 <div>
-                    <h3>Tamaño del mini-lote</h3>
+                    <div class="cabecera-parametro">
+                        <h3>Tamaño del mini-lote</h3>
+                        <div class="desplegable">
+                            <img src="/images/info-circle.svg" alt="Info icon" width="20" height="20" />
+                            <div class="texto-desplegable">Número de muestras que se procesan antes de actualizar los pesos del modelo</div>
+                        </div>
+                    </div>
                     <textarea name="" id="minibatch"></textarea>
                 </div>
                 <div>
-                    <h3>Max. epochs</h3>
+                    <div class="cabecera-parametro">
+                        <h3>Max. epochs</h3>
+                        <div class="desplegable">
+                            <img src="/images/info-circle.svg" alt="Info icon" width="20" height="20" />
+                            <div class="texto-desplegable">Número máximo de veces que el algoritmo pasará por todo el conjunto de entrenamiento</div>
+                        </div>
+                    </div>
                     <textarea name="" id="epochs"></textarea>
                 </div>
                 <div id="optimizador">
-                    <h3>Optimizador</h3>
+                    <div class="cabecera-parametro">
+                        <h3>Optimizador</h3>
+                        <div class="desplegable">
+                            <img src="/images/info-circle.svg" alt="Info icon" width="20" height="20" />
+                            <div class="texto-desplegable">Algoritmo que actualiza los pesos del modelo durante el entrenamiento para minimizar la pérdida</div>
+                        </div>
+                    </div>
                     <select id="optimizadores">
                         <option>Adam</option>
                         <option>SGD</option>
                     </select>
                 </div>
                 <div>
-                    <h3>Tasa de aprendizaje</h3>
+                    <div class="cabecera-parametro">
+                        <h3>Tasa de aprendizaje</h3>
+                        <div class="desplegable">
+                            <img src="/images/info-circle.svg" alt="Info icon" width="20" height="20" />
+                            <div class="texto-desplegable">Controla el tamaño de los pasos que da el modelo para minimizar la función de pérdida</div>
+                        </div>
+                    </div>
                     <textarea name="" id="learningR"></textarea>
                 </div>
             </section>

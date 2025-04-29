@@ -366,3 +366,37 @@ tr:hover {
     margin: 50px 0px;
 }
 
+.cabecera-parametro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.desplegable {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.desplegable .texto-desplegable {
+    visibility: hidden;
+    width: 180px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 6px 8px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Arriba de la imagen */
+    left: 50%;
+    margin-left: -90px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 14px;
+}
+
+.desplegable:hover .texto-desplegable {
+    visibility: visible;
+    opacity: 1;
+}

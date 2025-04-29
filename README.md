@@ -9,7 +9,7 @@ Este repositorio contiene el código fuente del Trabajo de Fin de Grado (TFG) pa
   - [Versiones de TensorFlow, NumPy y Scikit-learn](#versiones-de-tensorflow-numpy-y-scikit-learn)  
 - [Instalación](#instalación)  
   - [Clonar repositorio](#clonar-repositorio)  
-  - [Instalar dependencias Node.js](#Instalar-dependencias-Node.js)  
+  - [Instalar dependencias Node.js](#instalar-dependencias-nodejs)
 - [Modelos entrenados](#modelos-entrenados)  
 - [Ejecutar la aplicación](#ejecutar-la-aplicación)  
   - [CPU (por defecto)](#cpu-por-defecto)  

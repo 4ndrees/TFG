@@ -19,7 +19,7 @@
     <div class="window"></div>
     <div class="window"></div>
     <article class="pantalla-principal">
-        <ul>
+        <ul class="secciones">
             <li><a href="./index.html">Inicio</a></li>
             <li><a href="./metrics.html" class="active">Métricas</a></li>
             <li><a href="./train.html">Entrenamiento</a></li>
@@ -52,12 +52,19 @@
             <h2 class="subtitulo">Métricas generales</h2>
             <section id="metricas-generales">
                 <h3>Resultados en entrenamiento</h3>
+                <p>La siguiente gráfica muestra las curvas de accuracy y loss a lo largo de las épocas durante el entrenamiento del modelo</p>
                 <div class="metricas">
                     <div class="metricas-elem" id="metricas-elem">
                         <img id="resultados">
                     </div>
                 </div>
                 <h3>Resultados en test</h3>
+                <p>La siguiente tabla muestra las métricas de precisión, recall y F1. Cada una de estas métricas proporciona la siguiente información:</p>
+                <ul>
+                    <li>Precisión: Proporción de verdaderos positivos entre todos los positivos predichos</li>
+                    <li>Recall: Proporción de verdaderos positivos entre todos los positivos reales</li>
+                    <li>F1 Score: Media armónica entre precisión y recall, que equilibra ambos valores.</li>
+                </ul>
                 <div class="metricas">
                     <div class="metricas-elem">
                         <table>
@@ -73,12 +80,33 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+                <p>
+                    Una matriz de confusión es una tabla que resume el desempeño de un modelo de clasificación mostrando el número de 
+                    aciertos y errores separados por clases, dividiendo las predicciones en: verdaderos positivos, falsos positivos, 
+                    verdaderos negativos y falsos negativos.
+                </p>
+                <div class="metricas">
                     <div class="metricas-elem">
                         <img id="resultados-test">
                     </div>
+                </div>
+                <p>
+                    La distribución de predicciones de un modelo de aprendizaje automático describe cómo se reparten las clases o 
+                    valores predichos por el modelo, lo que permite analizar si hay sesgo hacia ciertas clases, si el modelo está 
+                    balanceado o si tiende a predecir una clase más que otras.
+                </p>   
+                <div class="metricas">
                     <div class="metricas-elem">
                         <img id="predicciones">
                     </div>
+                </div>
+                <p>
+                    La curva ROC (Receiver Operating Characteristic) muestra la relación entre la tasa de verdaderos positivos 
+                    (recall) y la tasa de falsos positivos a diferentes umbrales de decisión, permitiendo evaluar el rendimiento 
+                    de un modelo de clasificación binaria
+                </p>
+                <div class="metricas">
                     <div class="metricas-elem">
                         <img id="curva_roc">
                     </div>

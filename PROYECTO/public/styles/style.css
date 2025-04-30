@@ -19,6 +19,16 @@ p{
     font-size: 15px;
 }
 
+ul{
+    color: #35363A;
+    font-size: 15px;
+    padding-left: 15px;
+}
+
+li {
+    padding-top: 10px;
+}
+
 .window {
 	width: 10vw;
 	height: 10vw;
@@ -27,7 +37,7 @@ p{
 	left: 0;
 }
 
-ul{
+.secciones{
     width: 100%;
     background-color: rgba(191, 179, 168, 1);
     list-style-type: none;
@@ -43,12 +53,13 @@ ul{
     left: 0;
 }
 
-ul li{
+.secciones li{
     flex: 1 1 auto;
     float: left;
+    padding-top: 0px;
 }
 
-ul li a{
+.secciones li a{
     display: block;
     color: #35363A;
     text-align: center;
@@ -56,11 +67,11 @@ ul li a{
     text-decoration: none;
 }
 
-ul li a:hover:not(.active){
+.secciones li a:hover:not(.active){
     background-color: #736558;
 }
 
-.active {
+.secciones li .active {
     color: #F2E8DF;
     background-color: #A6374B;
 }
@@ -310,6 +321,7 @@ textarea{
 
 #metricas-generales{
     margin: 0px 30px;
+    padding-right: 100px;
 }
 
 .metricas{
@@ -318,7 +330,8 @@ textarea{
 
 .metricas-elem{
     margin: 0px 20px;
-    padding: 20px 0px;
+    padding-top: 20px;
+    padding-bottom: 75px;
     display: flex;
     justify-content: center;
 }

@@ -5,17 +5,70 @@ import json
 import datetime  
 import random
 import sys
-from kaggle.api.kaggle_api_extended import KaggleApi
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.optimizers import Adam, SGD
-import tensorflow as tf
-from tensorflow.keras import layers, models
-import numpy as np
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, roc_curve, auc
-import matplotlib.pyplot as plt
-import seaborn as sns
+import subprocess
 
+try:
+    import kaggle
+    from kaggle.api.kaggle_api_extended import KaggleApi
+except ImportError:
+    result = subprocess.run([sys.executable, "-m", "pip", "install", "kaggle"])
+    if result.returncode == 0:
+        print("El módulo de Kaggle correctamente.")
+        from kaggle.api.kaggle_api_extended import KaggleApi
+    else:
+        print(f"Error al intentar instalar los módulos: {result.stderr}")
+        sys.exit(1)
+
+try:
+    import numpy as np
+except ImportError:
+    result = subprocess.run([sys.executable, "-m", "pip", "install", "numpy==1.23.1"])
+    if result.returncode == 0:
+        print("NumPy instalado correctamente.")
+        import numpy as np
+    else:
+        print(f"Error al intentar instalar los módulos: {result.stderr}")
+        sys.exit(1)
+
+
+try:
+    from tensorflow.keras.models import load_model
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
+    from tensorflow.keras.optimizers import Adam, SGD
+    from tensorflow.keras import layers, models
+    import tensorflow as tf
+except ImportError:
+    result = subprocess.run([sys.executable, "-m", "pip", "install", "tensorflow==2.10.1"])
+    if result.returncode == 0:
+        print("TensorFlow instalados correctamente.")
+        from tensorflow.keras.models import load_model
+        from tensorflow.keras.preprocessing.image import ImageDataGenerator
+        from tensorflow.keras.optimizers import Adam, SGD
+        from tensorflow.keras import layers, models
+        import tensorflow as tf        
+        print(tf.__version__)
+        print(tf.test.is_built_with_cuda())
+        print(tf.test.is_built_with_gpu_support())
+    else:
+        print(f"Error al intentar instalar los módulos: {result.stderr}")
+        sys.exit(1)
+
+
+        
+try:
+    from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, roc_curve, auc
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+except ImportError:
+    result = subprocess.run([sys.executable, "-m", "pip", "install", "scikit-learn==1.6.1", "matplotlib", "seaborn"])
+    if result.returncode == 0:
+        print("scikit-learn, matplotlib y seaborn instalados correctamente.")
+        from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, roc_curve, auc
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+    else:
+        print(f"Error al intentar instalar los módulos: {result.stderr}")
+        sys.exit(1)
 def generar_graficas(historial_completo, carpeta_modelo):
     # Extraer datos
     historial_loss = historial_completo["history"]["loss"]

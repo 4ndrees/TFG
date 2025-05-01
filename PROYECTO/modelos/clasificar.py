@@ -66,6 +66,7 @@ def procesar_imagen_tensorflow(imagen_base64):
             
         image_data = base64.b64decode(imagen_base64)
         image = Image.open(io.BytesIO(image_data))
+        image = image.convert("RGB") 
         image = image.resize((224, 224))
         
         return np.array(image, dtype=np.float32) / 255.0

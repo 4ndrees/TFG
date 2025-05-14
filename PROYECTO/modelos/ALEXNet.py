@@ -51,6 +51,7 @@ from torchvision import models
 from torchvision.models import AlexNet_Weights
 import matplotlib.pyplot as plt
 from kaggle.api.kaggle_api_extended import KaggleApi
+from torch.utils.data import Subset
 
 
 def crear_entorno_conda(nombre_entorno, version_python="3.9"):
@@ -260,6 +261,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
 
     print(" El dataset está disponible :) \n\n")
       
+    
     # Transformaciones para preparar la imagen (redimensionar, normalizar, etc.)
     transform = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -273,16 +275,24 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     train_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'train'), transform=transform)
     val_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'valid'), transform=transform)
     test_dataset = datasets.ImageFolder(os.path.join(dataset_dir, 'test'), transform=transform)
-    #prueba para la GPU el batch size es la cantidad de imagenes q procesa la GPU a la vez, con 1 no funciona bien
-    #el num workers es un proceso separado q preprocesa y carga los datos antes de enviarlo a la GPU
-    #ESTO HAY QUE CAMBIARLO ANTES DE HACER PRUEBAS
-    train_loader = DataLoader(train_dataset, batch_size=mini_batch_size, shuffle=True, num_workers=8, pin_memory=True)
-    #train_loader = DataLoader(train_dataset, batch_size=mini_batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=mini_batch_size, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=mini_batch_size, shuffle=False)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Dispositivo en uso: {device}")
+
+    
+    if device.type == 'cuda':
+        num_workers = 8  # moderado para evitar sobrecargar la GPU
+        pin_memory = True
+    else:
+        num_workers = 0  # CPU no se beneficia tanto
+        pin_memory = False
+    
+    #CAMBIAR
+    train_loader = DataLoader(Subset(train_dataset, list(range(10))), batch_size=mini_batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
+
+    val_loader = DataLoader(val_dataset, batch_size=mini_batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=mini_batch_size, shuffle=False)
+    
     
     model = models.alexnet(weights=AlexNet_Weights.IMAGENET1K_V1)  # or AlexNet_Weights.DEFAULT
     model.classifier[6] = nn.Linear(4096, 1)  # Reemplaza la última capa de clasificación para adaptarla a una salida binaria (real o fake)
@@ -310,7 +320,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         x = 0
         #print(f"Entrenando modelo... {epoch}")
         for images, labels in train_loader:
-                #print(f"con imagenes" + str(x))
+                print(f"con imagenes" + str(x))
                 x += 1
         
                 images, labels = images.to(device), labels.float().to(device)
@@ -319,6 +329,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
                 ##print(f"labels shape: {labels.shape}, outputs shape: {outputs.shape}")
                 loss = criterion(outputs, labels)
                 loss.backward()
+                #
                 optimizer.step()
                 running_loss += loss.item()
                 
@@ -514,7 +525,6 @@ if __name__ == "__main__":
         
 
         entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimizer_name)
-        #entrenamiento("AlexNet", 32, 1, 0.001, "adam")  # "adam" como string
     except Exception as e:
         raise Exception(f"Error durante la ejecución: {e}")
   

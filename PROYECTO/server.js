@@ -65,13 +65,11 @@ app.post('/entrenar', async (req, res) => {
     };
 
     try {
-        // **Ejecutar el primer script (CUDA)**
+        // Ejecutar el primer script (CUDA)
         const resultado1 = await ejecutarScript(`${nombreModelo}_CUDA.py`);
 
-        // **Ejecutar el segundo script siempre, independientemente del resultado del primero**
         const resultado2 = await ejecutarScript(`${nombreModelo}.py`, [nombreModelo, miniBatchSize, maxEpochs, learnRate, optimizerName]);
 
-        // **Obtener la última línea de la salida estándar**
         const lineas = resultado2.stdout.trim().split("\n");
         const finalname = lineas[lineas.length - 1] || "NombreNoDefinido";
 

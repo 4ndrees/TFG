@@ -119,10 +119,10 @@ def cargar_modelo_y_predecir(model_name, imagen_base64):
 
 if __name__ == "__main__":
 
-        
-    model_name = sys.argv[1]
-    ruta_imagen = sys.argv[2]
+    ruta_imagen = sys.argv[1]
+    model_name = sys.argv[2]
     
+  
     try:
         # Convertir imagen a base64
         with open(ruta_imagen, "rb") as image_file:

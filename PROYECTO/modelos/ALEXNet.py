@@ -287,8 +287,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         num_workers = 0  # CPU no se beneficia tanto
         pin_memory = False
     
-    #CAMBIAR
-    train_loader = DataLoader(Subset(train_dataset, list(range(10))), batch_size=mini_batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
+    train_loader = DataLoader(train_dataset, batch_size=mini_batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
 
     val_loader = DataLoader(val_dataset, batch_size=mini_batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=mini_batch_size, shuffle=False)
@@ -325,13 +324,12 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
         
                 images, labels = images.to(device), labels.float().to(device)
                 optimizer.zero_grad()
-                outputs = model(images).view(-1)
+                outputs = model(images).squeeze(1)
                 ##print(f"labels shape: {labels.shape}, outputs shape: {outputs.shape}")
                 loss = criterion(outputs, labels)
                 loss.backward()
                 #
                 optimizer.step()
-                running_loss += loss.item()
                 
                 # Calcular la Accuracy durante el entrenamiento
                 predictions = (torch.sigmoid(outputs) > 0.5).float()
@@ -424,7 +422,7 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     fecha_hoy = datetime.datetime.today().strftime('%d-%m-%Y_%H.%M')
     carpeta_modelo = os.path.join(directorio_actual, "modelos", f"{nombre_modelo}_{fecha_hoy}")
 
-    # 📁 Crear la carpeta del modelo y la subcarpeta para las gráficas
+    #Crear la carpeta del modelo y la subcarpeta para las gráficas
     os.makedirs(carpeta_modelo, exist_ok=True)
     #print(f" Carpeta para gráficas creada en {os.path.join(carpeta_modelo, 'graficas')}")
 

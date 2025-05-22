@@ -466,6 +466,8 @@ def entrenamiento(nombre_modelo, mini_batch_size, max_epochs, learn_rate, optimi
     modelo_dir = os.path.join(carpeta_modelo, f"{nombre_modelo}.pth")
     torch.save(model.state_dict(), modelo_dir)
     ##print(f" Modelo guardado en {modelo_dir}")
+
+    
     
     generar_graficas(historial_completo, carpeta_modelo)
     # Ruta del archivo JSON

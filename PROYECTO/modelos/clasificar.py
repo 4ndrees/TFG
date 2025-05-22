@@ -5,6 +5,8 @@ import base64
 import io
 from PIL import Image
 import numpy as np
+from torchvision import transforms
+
 
 # Configuración inicial para evitar warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Silencia logs de TensorFlow
@@ -43,14 +45,12 @@ def procesar_imagen_pytorch(imagen_base64):
             imagen_base64 = imagen_base64.split(",")[1]
             
         image_data = base64.b64decode(imagen_base64)
-        image = Image.open(io.BytesIO(image_data))
-        
-        _, _, _, transforms = import_pytorch()
+        image = Image.open(io.BytesIO(image_data)).convert("RGB")
+
         transform = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.Resize((224, 224)),  # Igual que en entrenamiento
             transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
 
         return transform(image).unsqueeze(0)
@@ -78,13 +78,29 @@ def procesar_imagen_tensorflow(imagen_base64):
 def cargar_modelo_pytorch(dir_pesos, imagen_base64):
     """Carga modelos PyTorch (AlexNet)"""
     torch, nn, models, _ = import_pytorch()
+
+    from torchvision.models.alexnet import AlexNet
+    from torch.nn.modules.container import Sequential
+    from torch.nn.modules.conv import Conv2d
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Usando dispositivo: {device}")
+    print(f"Cargando pesos desde: {dir_pesos}")
     
-    model = models.alexnet(weights=None)
-    model.classifier[6] = nn.Linear(4096, 1)
-    model.load_state_dict(torch.load(dir_pesos, map_location=torch.device('cpu')))
+    if dir_pesos.endswith("_completo.pt"):
+        print("Cargando modelo completo")
+        model = torch.load(dir_pesos, map_location=device, weights_only=False)
+
+    else:
+        model = models.alexnet(weights=None)
+        model.classifier[6] = nn.Linear(4096, 1)
+        model.load_state_dict(torch.load(dir_pesos, map_location=device))
+
+    model.to(device)
     model.eval()
 
     image_tensor = procesar_imagen_pytorch(imagen_base64)
+    image_tensor = image_tensor.to(device)
     
     with torch.no_grad():
         output = model(image_tensor)
@@ -119,8 +135,10 @@ def cargar_modelo_y_predecir(model_name, imagen_base64):
 
 if __name__ == "__main__":
 
+    print("Ejecutando clasificador...")
     model_name = sys.argv[1]
     ruta_imagen = sys.argv[2]
+    print(f"Modelo: {model_name}")
   
     try:
         # Convertir imagen a base64

@@ -103,7 +103,7 @@ def cargar_modelo_pytorch(dir_pesos, imagen_base64):
     image_tensor = image_tensor.to(device)
     
     with torch.no_grad():
-        output = model(image_tensor)
+        output = model(image_tensor).squeeze()
         return torch.sigmoid(output).item()
 
 def cargar_modelo_tensorflow(dir_pesos, imagen_base64):
@@ -138,6 +138,7 @@ if __name__ == "__main__":
     print("Ejecutando clasificador...")
     model_name = sys.argv[1]
     ruta_imagen = sys.argv[2]
+
     print(f"Modelo: {model_name}")
   
     try:

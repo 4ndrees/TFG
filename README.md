@@ -61,11 +61,11 @@ npm install
 ```
 Otras librerías también son necesarias para el lanzamiento de la aplicación; estas se instalan automáticamente al iniciarla si es que aún no las tiene.
 # Modelos entrenados
-En el repositorio se encuentra un archivo .zip con modelos ya entrenados. Extraiga su contenido en:
+En el repositorio se encuentra un archivo .zip con modelos ya entrenados. Extraiga su contenido y asegúrese de colocar cada archivo .pth en su carpeta correspondiente, siguiendo la estructura:
 ```bash
-TFG/PROYECTO/Modelo
+TFG/PROYECTO/nombre del modelo_fecha/
 ```
-Se crearán subcarpetas por cada modelo.
+Es importante mantener la misma organización de carpetas que se encuentra dentro del .zip, ya que el código espera encontrar los archivos de pesos en esas ubicaciones.
 # Ejecutar la aplicación
 ## CPU (por defecto)
 ```bash

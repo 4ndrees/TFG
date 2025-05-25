@@ -86,3 +86,9 @@ Abra su navegador en
 La aplicación solo estará disponible en el equipo donde corre el servidor.
 
 # Licencia
+Este proyecto está licenciado bajo la Licencia Creative Commons Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0).
+
+Se puede copiar, distribuir y modificar el contenido siempre que se dé crédito al autor original y no se utilice con fines comerciales.
+
+Para más información, consultar: https://creativecommons.org/licenses/by-nc/4.0/
+

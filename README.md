@@ -66,6 +66,7 @@ En el repositorio se encuentra un archivo .zip con modelos ya entrenados. Extrai
 TFG/PROYECTO/nombre del modelo_fecha/
 ```
 Es importante mantener la misma organización de carpetas que se encuentra dentro del .zip, ya que el código espera encontrar los archivos de pesos en esas ubicaciones.
+Los modelos que no tengan su respectiva carpeta dentro del archivo ZIP no podrán ser utilizados para clasificación, solo podrán emplearse para consultar sus métricas.
 # Ejecutar la aplicación
 ## CPU (por defecto)
 ```bash

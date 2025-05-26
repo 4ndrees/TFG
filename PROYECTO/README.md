@@ -61,12 +61,7 @@ npm install
 ```
 Otras librerías también son necesarias para el lanzamiento de la aplicación; estas se instalan automáticamente al iniciarla si es que aún no las tiene.
 # Modelos entrenados
-En la siguiente carpeta de Google Drive "https://drive.google.com/drive/folders/1RZ-hg-wFOslWl00RVH6jBeo74F-5UWdX" se encuentra una serie de carpetas con modelos ya entrenados. Descargue su contenido y asegúrese de colocar cada archivo .pth (en caso de AlexNet) o .h5 (en caso de ResNet y VGGNet) en su carpeta correspondiente, siguiendo la estructura:
-```bash
-TFG/PROYECTO/nombre del modelo_fecha/
-```
-Es importante mantener la misma organización de carpetas que se encuentra dentro del .zip, ya que el código espera encontrar los archivos de pesos en esas ubicaciones.
-Los modelos que no tengan su respectiva carpeta dentro del archivo ZIP no podrán ser utilizados para clasificación, y solo podrán emplearse para consultar sus métricas.
+Debido al peso excesivo de los modelos entrenados, no es posible subirlos a GitHub.
 # Ejecutar la aplicación
 ## CPU (por defecto)
 ```bash

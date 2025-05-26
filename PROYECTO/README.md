@@ -61,7 +61,7 @@ npm install
 ```
 Otras librerías también son necesarias para el lanzamiento de la aplicación; estas se instalan automáticamente al iniciarla si es que aún no las tiene.
 # Modelos entrenados
-En el repositorio se encuentra un archivo .zip con modelos ya entrenados. Extraiga su contenido y asegúrese de colocar cada archivo .pth en su carpeta correspondiente, siguiendo la estructura:
+En el repositorio se encuentra un archivo .zip con modelos ya entrenados. Extraiga su contenido y asegúrese de colocar cada archivo .pth (AlexNet) y .h5 (ResNet y VGGNet) en su carpeta correspondiente, siguiendo la estructura:
 ```bash
 TFG/PROYECTO/nombre del modelo_fecha/
 ```

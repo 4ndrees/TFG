@@ -61,7 +61,7 @@ npm install
 ```
 Otras librerías también son necesarias para el lanzamiento de la aplicación; estas se instalan automáticamente al iniciarla si es que aún no las tiene.
 # Modelos entrenados
-En el repositorio se encuentra un archivo .zip con modelos ya entrenados. Extraiga su contenido y asegúrese de colocar cada archivo .pth en su carpeta correspondiente, siguiendo la estructura:
+En la siguiente carpeta de Google Drive "https://drive.google.com/drive/folders/1RZ-hg-wFOslWl00RVH6jBeo74F-5UWdX" se encuentra un archivo .zip con modelos ya entrenados. Extraiga su contenido y asegúrese de colocar cada archivo .pth (en caso de AlexNet) o .h5 (en caso de ResNet y VGGNet) en su carpeta correspondiente, siguiendo la estructura:
 ```bash
 TFG/PROYECTO/nombre del modelo_fecha/
 ```

@@ -168,8 +168,8 @@ h3{
 .pantalla-principal{
     position: relative;
     background: rgba(242, 232, 223, 0.95);
-    height: 700px;
-    width: 1200px;
+    height: 90vh;
+    width: 80vw;
     margin: 25px 175px;
     min-width: 200px;
     overflow-y: auto;
